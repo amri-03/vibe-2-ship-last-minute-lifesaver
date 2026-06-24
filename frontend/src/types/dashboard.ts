@@ -5,12 +5,13 @@
 // ── Core Types ─────────────────────────────────────────────
 
 export type Priority = 'critical' | 'high' | 'medium' | 'low'
-export type TaskStatus = 'active' | 'pending' | 'completed' | 'snoozed'
+export type TaskStatus = 'active' | 'in_progress' | 'pending' | 'completed' | 'snoozed'
 export type EventKind = 'focus' | 'calendar' | 'break' | 'intervention'
 
 export interface Task {
   id: string
   title: string
+  description?: string
   estimatedMinutes: number
   priority: Priority
   status: TaskStatus
@@ -39,6 +40,18 @@ export interface DialSegment {
   startHour: number   // 0–24 (fractional for minutes)
   endHour: number
   kind: EventKind
+}
+
+export type InterventionType = 'draft_proposal' | 'scheduling_proposal' | 'procrastination_nudge'
+export type InterventionStatus = 'active' | 'snoozed' | 'dismissed' | 'accepted'
+
+export interface Intervention {
+  id: string
+  type: InterventionType
+  status: InterventionStatus
+  title: string
+  message: string
+  payload?: any
 }
 
 // ── Mock Data ──────────────────────────────────────────────
@@ -175,6 +188,17 @@ export const MOCK_FOCUS_SESSION: FocusSession = {
   durationMinutes: 90,
   elapsedSeconds: 2340, // 39 minutes in
   isRunning: true,
+}
+
+export const MOCK_INTERVENTION: Intervention = {
+  id: 'i1',
+  type: 'draft_proposal',
+  status: 'active',
+  title: 'Draft Proposal',
+  message: 'I have generated a draft outline for your pitch deck slides.',
+  payload: {
+    draftText: '1. Introduction\n2. Market Opportunity\n3. Product Architecture\n4. Go-to-Market Strategy\n5. Financial Projections'
+  }
 }
 
 // ── Helpers ────────────────────────────────────────────────

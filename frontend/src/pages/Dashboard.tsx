@@ -1,16 +1,19 @@
 import { useState, useCallback } from 'react'
-import { Bug, Settings, LockKeyhole } from 'lucide-react'
+import { Bug, Settings, LockKeyhole, MessageSquare } from 'lucide-react'
 import DayDial from '../components/Timeline/DayDial'
 import TimelineSpine from '../components/Timeline/TimelineSpine'
 import ActiveFocusCard from '../components/Dashboard/ActiveFocusCard'
 import TaskDeck from '../components/Dashboard/TaskDeck'
+import InterventionSheet from '../components/Interventions/InterventionSheet'
+import CompanionDrawer from '../components/Dashboard/CompanionDrawer'
 import {
   MOCK_TASKS,
   MOCK_TIMELINE,
   MOCK_DIAL_SEGMENTS,
   MOCK_FOCUS_SESSION,
+  MOCK_INTERVENTION,
 } from '../types/dashboard'
-import type { FocusSession } from '../types/dashboard'
+import type { FocusSession, Task, TimelineEntry, Intervention } from '../types/dashboard'
 
 /* ──────────────────────────────────────────────────────────
    Dashboard.tsx — The Chrono-Stage Cockpit
@@ -26,6 +29,10 @@ interface DashboardProps {
 
 export default function Dashboard({ onLock }: DashboardProps) {
   const [session, setSession] = useState<FocusSession | null>(MOCK_FOCUS_SESSION)
+  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS)
+  const [timeline, setTimeline] = useState<TimelineEntry[]>(MOCK_TIMELINE)
+  const [activeIntervention, setActiveIntervention] = useState<Intervention | null>(MOCK_INTERVENTION)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
   // ── Session controls (mock) ──────────────────────────────
   const handleStart = useCallback(() => {
@@ -49,6 +56,47 @@ export default function Dashboard({ onLock }: DashboardProps) {
     onLock?.()
   }, [onLock])
 
+  // ── Intervention Handlers ────────────────────────────────
+  const handleAcceptDraft = useCallback((draftText: string) => {
+    // Append draft body text to selected task description, set status to in_progress
+    setTasks(prev => prev.map(t => {
+      // Hardcode applying it to the first active/critical task for this mockup
+      if (t.id === 't1') {
+        return {
+          ...t,
+          status: 'in_progress',
+          description: (t.description || '') + '\n\n## AI Generated Draft\n\n' + draftText
+        }
+      }
+      return t
+    }))
+    setActiveIntervention(null)
+  }, [])
+
+  const handleConfirmSlots = useCallback(() => {
+    // Generate a new focus block entry and update central timeline
+    const newEntry: TimelineEntry = {
+      id: `e${Date.now()}`,
+      time: '03:00 PM',
+      label: 'New Focus Block',
+      kind: 'focus',
+      durationMinutes: 45
+    }
+    setTimeline(prev => [...prev, newEntry])
+    setActiveIntervention(null)
+  }, [])
+
+  const handleSnoozeIntervention = useCallback(() => {
+    if (activeIntervention) {
+      setActiveIntervention({ ...activeIntervention, status: 'snoozed' })
+      setTimeout(() => setActiveIntervention(null), 300) // allow exit animation
+    }
+  }, [activeIntervention])
+
+  const handleDismissIntervention = useCallback(() => {
+    setActiveIntervention(null)
+  }, [])
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
       {/* ════════════════════════════════════════════════════
@@ -60,6 +108,18 @@ export default function Dashboard({ onLock }: DashboardProps) {
             Life Saver
           </h1>
           <nav className="flex items-center gap-1">
+            <button
+              type="button"
+              title="Companion"
+              onClick={() => setIsDrawerOpen(true)}
+              className="
+                rounded-lg p-2 text-charcoal/50
+                transition-all duration-200
+                hover:bg-sage/10 hover:text-sage
+              "
+            >
+              <MessageSquare size={16} />
+            </button>
             <button
               type="button"
               title="Debug"
@@ -140,7 +200,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               <div className="h-px bg-paper-border/50" />
 
               {/* Timeline Spine */}
-              <TimelineSpine entries={MOCK_TIMELINE} />
+              <TimelineSpine entries={timeline} />
             </div>
           </aside>
 
@@ -156,12 +216,26 @@ export default function Dashboard({ onLock }: DashboardProps) {
               />
 
               {/* Task Deck */}
-              <TaskDeck tasks={MOCK_TASKS} />
+              <TaskDeck tasks={tasks} />
             </div>
           </section>
 
         </div>
       </main>
+
+      {/* ── Overlays ────────────────────────────────────────── */}
+      <InterventionSheet
+        intervention={activeIntervention?.status === 'active' ? activeIntervention : null}
+        onAcceptDraft={handleAcceptDraft}
+        onConfirmSlots={handleConfirmSlots}
+        onSnooze={handleSnoozeIntervention}
+        onDismiss={handleDismissIntervention}
+      />
+
+      <CompanionDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </div>
   )
 }

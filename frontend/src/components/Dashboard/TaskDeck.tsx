@@ -27,6 +27,7 @@ function StatusIcon({ status }: { status: TaskStatus }) {
     case 'completed':
       return <CheckCircle2 size={15} className="text-sage flex-shrink-0" />
     case 'active':
+    case 'in_progress':
       return (
         <span className="relative flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center">
           <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-sage opacity-50 animate-ping" />
@@ -100,7 +101,7 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
     const completed: Task[] = []
     for (const t of tasks) {
       if (t.status === 'completed') completed.push(t)
-      else if (t.status === 'active') active.push(t)
+      else if (t.status === 'active' || t.status === 'in_progress') active.push(t)
       else pending.push(t)
     }
     // Sort pending by priority weight
