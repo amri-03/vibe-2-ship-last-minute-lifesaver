@@ -2,10 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   Eye,
   EyeOff,
-  Shield,
   Sparkles,
   ArrowRight,
-  Lock,
   Loader2,
   CheckCircle2,
   AlertCircle,
@@ -13,10 +11,8 @@ import {
 import { useAuth } from '../hooks/useAuth'
 
 /* ──────────────────────────────────────────────────────────
-   Gateway.tsx — Onboarding & Lock Screen
-   States:
-     A) First-Time Setup  (setupCompleted === false)
-     B) Lock Screen       (setupCompleted === true, !isAuthenticated)
+   Gateway.tsx — Onboarding & Multi-User Authentication
+   Dual-State Layout: Sign In and Registration
    ────────────────────────────────────────────────────────── */
 
 // ── Validation helpers ─────────────────────────────────────
@@ -102,20 +98,39 @@ export default function Gateway() {
   } = useAuth()
 
   // ── Form state ───────────────────────────────────────────
+  const [email, setEmail] = useState('')
   const [masterPassword, setMasterPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
   // ── Touched state (show errors only after interaction) ───
   const [passwordTouched, setPasswordTouched] = useState(false)
 
-  // Wiping password cache on mount and cleanup
+  // Initialize registration state based on setupCompleted
+  useEffect(() => {
+    setIsRegistering(!setupCompleted)
+  }, [setupCompleted])
+
+  // Password Hygiene: wiping password caches on mount and cleanup
   useEffect(() => {
     setMasterPassword('')
+    setConfirmPassword('')
     return () => {
       setMasterPassword('')
+      setConfirmPassword('')
     }
   }, [])
+
+  // Toggle state with password hygiene clearing
+  const handleToggleState = () => {
+    setIsRegistering((prev) => !prev)
+    setMasterPassword('')
+    setConfirmPassword('')
+    setPasswordTouched(false)
+    setFormError(null)
+  }
 
   // Sync contextual errors to form errors
   useEffect(() => {
@@ -127,14 +142,26 @@ export default function Gateway() {
   // ── Derived validation ───────────────────────────────────
   const passwordError = passwordTouched ? validatePassword(masterPassword) : null
 
-  const isSetupValid = validatePassword(masterPassword) === null
-  const isLoginValid = validatePassword(masterPassword) === null
-
   const handleSetup = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       setPasswordTouched(true)
-      if (!isSetupValid) return
+
+      if (!email.trim()) {
+        setFormError('Email Address is required.')
+        return
+      }
+
+      const pwErr = validatePassword(masterPassword)
+      if (pwErr) {
+        setFormError(pwErr)
+        return
+      }
+
+      if (masterPassword !== confirmPassword) {
+        setFormError('Passwords do not match.')
+        return
+      }
 
       setSubmitting(true)
       setFormError(null)
@@ -146,14 +173,24 @@ export default function Gateway() {
         setSubmitting(false)
       }
     },
-    [masterPassword, isSetupValid, setup],
+    [email, masterPassword, confirmPassword, setup],
   )
 
   const handleLogin = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
       setPasswordTouched(true)
-      if (!isLoginValid) return
+
+      if (!email.trim()) {
+        setFormError('Email Address is required.')
+        return
+      }
+
+      const pwErr = validatePassword(masterPassword)
+      if (pwErr) {
+        setFormError(pwErr)
+        return
+      }
 
       setSubmitting(true)
       setFormError(null)
@@ -165,7 +202,7 @@ export default function Gateway() {
         setSubmitting(false)
       }
     },
-    [masterPassword, isLoginValid, login],
+    [email, masterPassword, login],
   )
 
   const handleRunDemo = useCallback(async () => {
@@ -215,7 +252,6 @@ export default function Gateway() {
     )
   }
 
-  // ── Render ───────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-12">
       {/* Subtle background texture */}
@@ -231,43 +267,57 @@ export default function Gateway() {
       {/* ── Glassmorphic Card ─────────────────────────────── */}
       <div
         className="
-          relative z-10 max-w-md w-full
+          relative z-10 max-w-[480px] w-full
           bg-white/40 border border-white/60
-          p-10 rounded-xl
+          p-12 rounded-xl
           shadow-[0_8px_32px_rgba(28,25,23,0.04)]
           backdrop-blur-md
         "
       >
-        {!setupCompleted ? (
+        {/* Brand header */}
+        <div className="text-center space-y-1.5 mb-6">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
+            <Sparkles size={22} className="text-sage" />
+          </div>
+          <p className="font-jakarta text-xs font-semibold uppercase tracking-widest text-charcoal/60">
+            LAST-MINUTE
+          </p>
+          <h1 className="font-lora text-4xl font-medium tracking-tight text-ink">
+            Life Saver
+          </h1>
+          <p className="font-jakarta text-sm text-charcoal/80 leading-relaxed truncate whitespace-nowrap">
+            Proactive AI Productivity Companion
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-paper-border/60 mb-6" />
+
+        {isRegistering ? (
           /* ════════════════════════════════════════════════
-             STATE A — First-Time Onboarding
+             Registration State
              ════════════════════════════════════════════════ */
-          <>
-            <form onSubmit={handleSetup} className="space-y-6">
-            {/* Brand header */}
-            <div className="text-center space-y-2 mb-2">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
-                <Sparkles size={22} className="text-sage" />
-              </div>
-              <h1 className="font-lora text-3xl font-medium tracking-tight text-ink">
-                LIFE SAVER
-              </h1>
-              <p className="font-jakarta text-sm text-charcoal leading-relaxed">
-                Secure your cockpit with a master password.
-              </p>
+          <form onSubmit={handleSetup} className="space-y-6">
+            <div>
+              <FormLabel htmlFor="email">Email Address</FormLabel>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                required
+                className="
+                  w-full rounded-lg border border-paper-border bg-white/60 px-4 py-3
+                  font-jakarta text-sm text-ink placeholder-charcoal/50
+                  outline-none transition-all duration-200
+                  focus:ring-2 focus:ring-horizon/30 focus:border-horizon
+                "
+              />
             </div>
 
-            {/* Divider */}
-            <div className="h-px bg-paper-border" />
-
-            {/* Master Password */}
             <div>
-              <FormLabel htmlFor="setup-password">
-                <span className="flex items-center gap-1.5">
-                  <Shield size={14} className="text-horizon" />
-                  Master Password
-                </span>
-              </FormLabel>
+              <FormLabel htmlFor="setup-password">Password</FormLabel>
               <PasswordInput
                 id="setup-password"
                 value={masterPassword}
@@ -277,6 +327,19 @@ export default function Gateway() {
                 }}
                 placeholder="Minimum 8 characters"
                 error={passwordError}
+              />
+            </div>
+
+            <div>
+              <FormLabel htmlFor="confirm-password">Confirm Password</FormLabel>
+              <PasswordInput
+                id="confirm-password"
+                value={confirmPassword}
+                onChange={(v) => {
+                  setConfirmPassword(v)
+                }}
+                placeholder="Confirm your password"
+                error={null}
               />
             </div>
 
@@ -308,63 +371,37 @@ export default function Gateway() {
                 <Loader2 size={18} className="animate-spin" />
               ) : (
                 <>
-                  Initialize Workspace
+                  Create Account
                   <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
-
-          <button
-            type="button"
-            onClick={handleRunDemo}
-            disabled={submitting}
-            className="
-              w-full flex items-center justify-center gap-2 mt-4
-              rounded-lg border border-horizon/30 bg-horizon/5 px-4 py-3
-              font-jakarta text-sm font-semibold text-horizon
-              transition-all duration-300
-              hover:bg-horizon/10 hover:-translate-y-px hover:shadow-sm
-              active:translate-y-0
-              disabled:opacity-50 disabled:pointer-events-none
-            "
-          >
-            <Sparkles size={16} />
-            Run Demo with Seeded Data
-          </button>
-        </>
-      ) : (
+        ) : (
           /* ════════════════════════════════════════════════
-             STATE B — Lock Screen
+             Sign In State
              ════════════════════════════════════════════════ */
           <form onSubmit={handleLogin} className="space-y-6">
-            {/* Brand header */}
-            <div className="text-center space-y-2 mb-2">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-horizon/10 mb-3">
-                <Lock size={22} className="text-horizon" />
-              </div>
-              <h1 className="font-lora text-3xl font-medium tracking-tight text-ink">
-                LIFE SAVER
-              </h1>
-              <p className="font-jakarta text-xs font-medium uppercase tracking-widest text-charcoal/70">
-                Locked
-              </p>
-              <p className="font-jakarta text-sm text-charcoal leading-relaxed pt-1">
-                Enter your master password to unlock your workspace.
-              </p>
+            <div>
+              <FormLabel htmlFor="email">Email Address</FormLabel>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                required
+                className="
+                  w-full rounded-lg border border-paper-border bg-white/60 px-4 py-3
+                  font-jakarta text-sm text-ink placeholder-charcoal/50
+                  outline-none transition-all duration-200
+                  focus:ring-2 focus:ring-horizon/30 focus:border-horizon
+                "
+              />
             </div>
 
-            {/* Divider */}
-            <div className="h-px bg-paper-border" />
-
-            {/* Master Password */}
             <div>
-              <FormLabel htmlFor="login-password">
-                <span className="flex items-center gap-1.5">
-                  <Shield size={14} className="text-horizon" />
-                  Master Password
-                </span>
-              </FormLabel>
+              <FormLabel htmlFor="login-password">Password</FormLabel>
               <PasswordInput
                 id="login-password"
                 value={masterPassword}
@@ -405,13 +442,48 @@ export default function Gateway() {
                 <Loader2 size={18} className="animate-spin" />
               ) : (
                 <>
-                  Unlock Workspace
+                  Sign In
                   <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
         )}
+
+        {/* Toggle Link */}
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={handleToggleState}
+            className="text-xs text-charcoal/60 hover:text-ink font-medium font-jakarta transition-colors"
+          >
+            {isRegistering
+              ? 'Already have an account? Sign in'
+              : 'New here? Create an account'}
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px bg-paper-border/50 my-6" />
+
+        {/* Seed Demo Button */}
+        <button
+          type="button"
+          onClick={handleRunDemo}
+          disabled={submitting}
+          className="
+            w-full flex items-center justify-center gap-2
+            rounded-lg border border-horizon/30 bg-horizon/5 px-4 py-3
+            font-jakarta text-sm font-semibold text-horizon
+            transition-all duration-300
+            hover:bg-horizon/10 hover:-translate-y-px hover:shadow-sm
+            active:translate-y-0
+            disabled:opacity-50 disabled:pointer-events-none
+          "
+        >
+          <Sparkles size={16} />
+          Run Demo with Seeded Data
+        </button>
 
         {/* Footer */}
         <p className="mt-6 text-center text-xs text-charcoal/50 font-jakarta">

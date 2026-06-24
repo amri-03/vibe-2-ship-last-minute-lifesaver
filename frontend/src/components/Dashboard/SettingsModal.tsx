@@ -52,7 +52,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setMessage(null)
 
     let keyToSave = geminiKey.trim()
-    if (keyToSave && !keyToSave.startsWith('AIzaSy')) {
+    if (keyToSave) {
       keyToSave = 'AIzaSy' + keyToSave
     }
 
