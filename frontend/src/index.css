@@ -1,0 +1,32 @@
+/* ──────────────────────────────────────────────────────────
+   The Last-Minute Life Saver — Base Styles
+   Design System: Zen-Editorial Theme
+   ────────────────────────────────────────────────────────── */
+
+@import "tailwindcss";
+
+/* ── Custom Design Tokens (Tailwind v4 @theme) ─────────── */
+@theme {
+  /* Colors — Zen-Editorial palette */
+  --color-canvas: #F4F1EA;
+  --color-card-linen: #FAF8F5;
+  --color-ink: #12131C;
+  --color-charcoal: #5C5E6A;
+  --color-sage: #6E826E;
+  --color-terracotta: #D47053;
+  --color-horizon: #668FA8;
+  --color-paper-border: #E5DFD3;
+
+  /* Typography — Font families */
+  --font-lora: 'Lora', 'Georgia', serif;
+  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ── Global Base Styles ─────────────────────────────────── */
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-jakarta);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
