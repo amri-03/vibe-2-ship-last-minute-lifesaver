@@ -279,13 +279,13 @@ export default function Gateway() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
             <Sparkles size={22} className="text-sage" />
           </div>
-          <p className="font-jakarta text-xs font-semibold uppercase tracking-widest text-charcoal/60">
+          <p className="font-jakarta font-semibold uppercase text-ink" style={{ fontSize: '10.8px', letterSpacing: '0.12em' }}>
             LAST-MINUTE
           </p>
           <h1 className="font-lora text-4xl font-medium tracking-tight text-ink">
             Life Saver
           </h1>
-          <p className="font-jakarta text-sm text-charcoal/80 leading-relaxed truncate whitespace-nowrap">
+          <p className="font-jakarta text-sm text-charcoal/85 leading-relaxed tracking-[0.16em] truncate whitespace-nowrap">
             Proactive AI Productivity Companion
           </p>
         </div>
@@ -358,12 +358,12 @@ export default function Gateway() {
               type="submit"
               disabled={submitting}
               className="
-                w-full flex items-center justify-center gap-2
+                w-full flex items-center justify-center gap-2 group
                 rounded-lg bg-ink px-4 py-3.5
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300
-                hover:bg-ink/90 hover:-translate-y-px hover:shadow-md
-                active:translate-y-0 active:shadow-sm
+                hover:bg-black hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
+                active:translate-y-0 active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
               "
             >
@@ -372,7 +372,7 @@ export default function Gateway() {
               ) : (
                 <>
                   Create Account
-                  <ArrowRight size={16} />
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </>
               )}
             </button>
@@ -429,12 +429,12 @@ export default function Gateway() {
               type="submit"
               disabled={submitting}
               className="
-                w-full flex items-center justify-center gap-2
+                w-full flex items-center justify-center gap-2 group
                 rounded-lg bg-ink px-4 py-3.5
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300
-                hover:bg-ink/90 hover:-translate-y-px hover:shadow-md
-                active:translate-y-0 active:shadow-sm
+                hover:bg-black hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
+                active:translate-y-0 active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
               "
             >
@@ -443,7 +443,7 @@ export default function Gateway() {
               ) : (
                 <>
                   Sign In
-                  <ArrowRight size={16} />
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
                 </>
               )}
             </button>
@@ -455,7 +455,7 @@ export default function Gateway() {
           <button
             type="button"
             onClick={handleToggleState}
-            className="text-xs text-charcoal/60 hover:text-ink font-medium font-jakarta transition-colors"
+            className="text-xs text-charcoal/85 hover:text-ink font-semibold font-jakarta transition-colors"
           >
             {isRegistering
               ? 'Already have an account? Sign in'
@@ -486,7 +486,7 @@ export default function Gateway() {
         </button>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-charcoal/50 font-jakarta">
+        <p className="mt-6 text-center text-xs text-charcoal/80 font-jakarta">
           Your data is encrypted and stored locally.
         </p>
       </div>
