@@ -17,26 +17,24 @@ $$ LANGUAGE plpgsql;
 -- 2. TABLE CREATION
 -- ==========================================
 
--- Table: profiles
+-- Table: profiles (Refactored for Multi-User Support)
 CREATE TABLE IF NOT EXISTS profiles (
-    id INTEGER PRIMARY KEY DEFAULT 1,
-    master_password_hash VARCHAR(255) NOT NULL,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     google_oauth_access_token TEXT,
     google_oauth_refresh_token TEXT,
     google_oauth_expires_at TIMESTAMPTZ,
     google_user_email VARCHAR(255),
     gemini_api_key TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    
-    -- Constraint to enforce single-user capability
-    CONSTRAINT sole_user_record CHECK (id = 1)
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Table: tasks
+-- Table: tasks (Refactored profile_id references to UUID)
 CREATE TABLE IF NOT EXISTS tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id INTEGER DEFAULT 1 NOT NULL,
+    profile_id UUID NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     estimated_duration_minutes INTEGER NOT NULL,
@@ -54,10 +52,10 @@ CREATE TABLE IF NOT EXISTS tasks (
     CONSTRAINT chk_status CHECK (status IN ('backlog', 'in_progress', 'completed', 'archived'))
 );
 
--- Table: focus_blocks
+-- Table: focus_blocks (Refactored profile_id references to UUID)
 CREATE TABLE IF NOT EXISTS focus_blocks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id INTEGER DEFAULT 1 NOT NULL,
+    profile_id UUID NOT NULL,
     task_id UUID,
     google_event_id VARCHAR(255) UNIQUE,
     title VARCHAR(255) NOT NULL,
@@ -75,10 +73,10 @@ CREATE TABLE IF NOT EXISTS focus_blocks (
     CONSTRAINT chk_focus_status CHECK (status IN ('scheduled', 'active', 'completed', 'missed', 'cancelled'))
 );
 
--- Table: ai_interventions
+-- Table: ai_interventions (Refactored profile_id references to UUID)
 CREATE TABLE IF NOT EXISTS ai_interventions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    profile_id INTEGER DEFAULT 1 NOT NULL,
+    profile_id UUID NOT NULL,
     task_id UUID NOT NULL,
     type VARCHAR(30) NOT NULL,
     status VARCHAR(20) DEFAULT 'pending' NOT NULL,
@@ -98,12 +96,15 @@ CREATE TABLE IF NOT EXISTS ai_interventions (
 -- ==========================================
 -- 3. INDEXES FOR PERFORMANCE
 -- ==========================================
+CREATE INDEX IF NOT EXISTS idx_tasks_profile_id ON tasks(profile_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
 CREATE INDEX IF NOT EXISTS idx_tasks_due_at ON tasks(due_at);
 
+CREATE INDEX IF NOT EXISTS idx_focus_blocks_profile_id ON focus_blocks(profile_id);
 CREATE INDEX IF NOT EXISTS idx_focus_blocks_task_id ON focus_blocks(task_id);
 CREATE INDEX IF NOT EXISTS idx_focus_blocks_times ON focus_blocks(start_time, end_time);
 
+CREATE INDEX IF NOT EXISTS idx_ai_interventions_profile_id ON ai_interventions(profile_id);
 CREATE INDEX IF NOT EXISTS idx_ai_interventions_task_id ON ai_interventions(task_id);
 CREATE INDEX IF NOT EXISTS idx_ai_interventions_status ON ai_interventions(status);
 CREATE INDEX IF NOT EXISTS idx_ai_interventions_snoozed ON ai_interventions(snoozed_until) WHERE status = 'snoozed';
