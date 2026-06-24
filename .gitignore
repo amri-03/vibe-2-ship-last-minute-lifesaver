@@ -1,8 +1,56 @@
 .tmp/
 .env
+.env.*
+!.env.example
 credentials.json
 token.json
 __pycache__/
 *.pyc
 *.pdf
 .resources/
+
+# Dependency directories
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Testing and Linting
+coverage/
+.nyc_output/
+.eslintcache
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+
+# Local cache files
+.eslintcache
+.parcel-cache
+.cache/
+
+# Local Databases
+*.db
+*.sqlite
+*.sqlite3
+
