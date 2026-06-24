@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_development_do
 
 export const setup = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { masterPassword, geminiApiKey } = req.body;
+    const { masterPassword } = req.body;
 
     // 1. Check if profile exists
     const { data: existingProfile, error: selectError } = await supabase
@@ -49,19 +49,15 @@ export const setup = async (req: Request, res: Response): Promise<void> => {
     // 3. Hash password
     const masterPasswordHash = await bcrypt.hash(masterPassword, 10);
 
-    // 4. Encrypt Gemini API key if present
-    let encryptedGeminiKey = null;
-    if (geminiApiKey) {
-      encryptedGeminiKey = encrypt(geminiApiKey);
-    }
-
-    // 5. Insert to profiles
+    // 4. Insert to profiles
     const { data: newProfile, error: insertError } = await supabase
       .from('profiles')
       .insert({
         id: 1,
         master_password_hash: masterPasswordHash,
-        gemini_api_key: encryptedGeminiKey,
+        gemini_api_key: null,
+        google_oauth_access_token: null,
+        google_oauth_refresh_token: null,
       })
       .select()
       .single();
@@ -206,7 +202,7 @@ export const googleAuthRedirect = (req: Request, res: Response): void => {
     ],
   });
 
-  res.redirect(url);
+  res.status(200).json({ success: true, url });
 };
 
 export const googleAuthCallback = async (req: Request, res: Response): Promise<void> => {
@@ -262,6 +258,38 @@ export const googleAuthCallback = async (req: Request, res: Response): Promise<v
   } catch (error) {
     console.error('Google OAuth callback error:', error);
     res.redirect('http://localhost:5173/settings?auth=error');
+  }
+};
+
+export const updateConfig = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { geminiApiKey } = req.body;
+    const updates: any = {};
+    
+    if (geminiApiKey !== undefined) {
+      if (geminiApiKey) {
+        updates.gemini_api_key = encrypt(geminiApiKey);
+      } else {
+        updates.gemini_api_key = null;
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      res.status(400).json({ error: 'VALIDATION_FAILED', message: 'No valid configuration fields provided.' });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    res.status(200).json({ success: true, message: 'Configuration updated successfully.' });
+  } catch (error) {
+    console.error('Update config error:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to update configuration.' });
   }
 };
 

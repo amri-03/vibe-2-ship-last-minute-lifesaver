@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { setup, login, status, googleAuthRedirect, googleAuthCallback, seedDemoData } from '../controllers/auth';
+import { setup, login, status, googleAuthRedirect, googleAuthCallback, seedDemoData, updateConfig } from '../controllers/auth';
 import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
@@ -21,5 +21,8 @@ router.get('/google', authenticateJWT, googleAuthRedirect);
 
 // GET /api/auth/google/callback
 router.get('/google/callback', googleAuthCallback);
+
+// PATCH /api/auth/config
+router.patch('/config', authenticateJWT, updateConfig);
 
 export default router;
