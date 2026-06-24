@@ -1,25 +1,16 @@
 import { Router } from 'express';
+import { getFocusBlocks, createFocusBlock, updateFocusBlock, deleteFocusBlock, syncCalendar } from '../controllers/focusBlocks';
+import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/focus-blocks
-router.get('/', (req, res) => {
-  res.status(501).json({ message: 'Get focus blocks not implemented' });
-});
+router.use(authenticateJWT);
 
-// POST /api/focus-blocks
-router.post('/', (req, res) => {
-  res.status(501).json({ message: 'Create focus block not implemented' });
-});
+router.get('/', getFocusBlocks);
+router.post('/', createFocusBlock);
+router.patch('/:id', updateFocusBlock);
+router.delete('/:id', deleteFocusBlock);
 
-// PATCH /api/focus-blocks/:id
-router.patch('/:id', (req, res) => {
-  res.status(501).json({ message: 'Update focus block not implemented' });
-});
-
-// POST /api/focus-blocks/sync
-router.post('/sync', (req, res) => {
-  res.status(501).json({ message: 'Sync calendar not implemented' });
-});
+router.post('/sync', syncCalendar);
 
 export default router;
