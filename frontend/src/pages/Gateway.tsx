@@ -279,13 +279,13 @@ export default function Gateway() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
             <Sparkles size={22} className="text-sage" />
           </div>
-          <p className="font-jakarta font-semibold uppercase text-ink" style={{ fontSize: '10.8px', letterSpacing: '0.12em' }}>
+          <p className="font-jakarta text-sm font-semibold uppercase text-ink" style={{ letterSpacing: '0.12em' }}>
             LAST-MINUTE
           </p>
-          <h1 className="font-lora text-4xl font-medium tracking-tight text-ink">
+          <h1 className="font-lora text-4xl font-medium tracking-tight text-ink" style={{ letterSpacing: '0.04em' }}>
             Life Saver
           </h1>
-          <p className="font-jakarta text-sm text-charcoal/85 leading-relaxed tracking-[0.16em] truncate whitespace-nowrap">
+          <p className="font-jakarta text-md text-charcoal/120 leading-relaxed tracking-[0.10em] truncate whitespace-nowrap">
             Proactive AI Productivity Companion
           </p>
         </div>
@@ -361,7 +361,7 @@ export default function Gateway() {
                 w-full flex items-center justify-center gap-2 group
                 rounded-lg bg-ink px-4 py-3.5
                 font-jakarta text-sm font-semibold text-white
-                transition-all duration-300
+                transition-all duration-300 ease-in-out will-change-transform
                 hover:bg-black hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
                 active:translate-y-0 active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
@@ -432,7 +432,7 @@ export default function Gateway() {
                 w-full flex items-center justify-center gap-2 group
                 rounded-lg bg-ink px-4 py-3.5
                 font-jakarta text-sm font-semibold text-white
-                transition-all duration-300
+                transition-all duration-300 ease-in-out will-change-transform
                 hover:bg-black hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
                 active:translate-y-0 active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
