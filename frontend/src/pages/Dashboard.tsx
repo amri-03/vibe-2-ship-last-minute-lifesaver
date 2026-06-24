@@ -7,6 +7,7 @@ import TaskDeck from '../components/Dashboard/TaskDeck'
 import InterventionSheet from '../components/Interventions/InterventionSheet'
 import CompanionDrawer from '../components/Dashboard/CompanionDrawer'
 import DebugDrawer from '../components/Dashboard/DebugDrawer'
+import SettingsModal from '../components/Dashboard/SettingsModal'
 import { MOCK_DIAL_SEGMENTS } from '../types/dashboard'
 import type { FocusSession } from '../types/dashboard'
 import { useTasks } from '../hooks/useTasks'
@@ -33,6 +34,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
   const [session, setSession] = useState<FocusSession | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDebugOpen, setIsDebugOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   // Fetch interventions on mount
   useEffect(() => {
@@ -157,6 +159,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
             <button
               type="button"
               title="Settings"
+              onClick={() => setIsSettingsOpen(true)}
               className="
                 rounded-lg p-2 text-charcoal/50
                 transition-all duration-200
@@ -263,6 +266,11 @@ export default function Dashboard({ onLock }: DashboardProps) {
       <DebugDrawer
         isOpen={isDebugOpen}
         onClose={() => setIsDebugOpen(false)}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
       />
     </div>
   )
