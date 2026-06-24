@@ -455,7 +455,7 @@ export default function Gateway() {
           <button
             type="button"
             onClick={handleToggleState}
-            className="text-xs text-charcoal/85 hover:text-ink font-semibold font-jakarta transition-colors"
+            className="text-sm text-charcoal font-semibold font-jakarta cursor-pointer hover:text-charcoal transition-colors"
           >
             {isRegistering
               ? 'Already have an account? Sign in'
@@ -473,10 +473,10 @@ export default function Gateway() {
           disabled={submitting}
           className="
             w-full flex items-center justify-center gap-2
-            rounded-lg border border-horizon/30 bg-horizon/5 px-4 py-3
-            font-jakarta text-sm font-semibold text-horizon
+            rounded-lg border border-charcoal/40 bg-charcoal/5 px-4 py-3
+            font-jakarta text-sm font-semibold text-charcoal
             transition-all duration-300
-            hover:bg-horizon/10 hover:-translate-y-px hover:shadow-sm
+            hover:bg-charcoal/10 hover:text-ink hover:border-charcoal/75 hover:-translate-y-px hover:shadow-sm
             active:translate-y-0
             disabled:opacity-50 disabled:pointer-events-none
           "
@@ -486,7 +486,7 @@ export default function Gateway() {
         </button>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-charcoal/80 font-jakarta">
+        <p className="mt-6 text-center text-xs text-charcoal font-medium font-jakarta">
           Your data is encrypted and stored locally.
         </p>
       </div>
