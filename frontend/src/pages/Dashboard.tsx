@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Bug, Settings, LockKeyhole, MessageSquare } from 'lucide-react'
 import DayDial from '../components/Timeline/DayDial'
 import TimelineSpine from '../components/Timeline/TimelineSpine'
@@ -6,14 +6,11 @@ import ActiveFocusCard from '../components/Dashboard/ActiveFocusCard'
 import TaskDeck from '../components/Dashboard/TaskDeck'
 import InterventionSheet from '../components/Interventions/InterventionSheet'
 import CompanionDrawer from '../components/Dashboard/CompanionDrawer'
-import {
-  MOCK_TASKS,
-  MOCK_TIMELINE,
-  MOCK_DIAL_SEGMENTS,
-  MOCK_FOCUS_SESSION,
-  MOCK_INTERVENTION,
-} from '../types/dashboard'
-import type { FocusSession, Task, TimelineEntry, Intervention } from '../types/dashboard'
+import { MOCK_DIAL_SEGMENTS } from '../types/dashboard'
+import type { FocusSession } from '../types/dashboard'
+import { useTasks } from '../hooks/useTasks'
+import { useFocusBlocks } from '../hooks/useFocusBlocks'
+import { useInterventions } from '../hooks/useInterventions'
 
 /* ──────────────────────────────────────────────────────────
    Dashboard.tsx — The Chrono-Stage Cockpit
@@ -28,20 +25,40 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ onLock }: DashboardProps) {
-  const [session, setSession] = useState<FocusSession | null>(MOCK_FOCUS_SESSION)
-  const [tasks, setTasks] = useState<Task[]>(MOCK_TASKS)
-  const [timeline, setTimeline] = useState<TimelineEntry[]>(MOCK_TIMELINE)
-  const [activeIntervention, setActiveIntervention] = useState<Intervention | null>(MOCK_INTERVENTION)
+  const { tasks, fetchTasks } = useTasks()
+  const { timeline, fetchFocusBlocks } = useFocusBlocks()
+  const { interventions, updateInterventionStatus, fetchInterventions } = useInterventions()
+
+  const [session, setSession] = useState<FocusSession | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-  // ── Session controls (mock) ──────────────────────────────
+  // Fetch interventions on mount
+  useEffect(() => {
+    fetchInterventions()
+  }, [fetchInterventions])
+
+  // Derive active intervention from interventions array
+  const activeIntervention = interventions.find((i) => i.status === 'active') || null
+
+  // ── Session controls ──────────────────────────────
   const handleStart = useCallback(() => {
+    const activeTask = tasks.find((t) => t.status === 'in_progress') || tasks.find((t) => t.status === 'pending')
+    const taskTitle = activeTask ? activeTask.title : 'General Session'
+    const taskId = activeTask ? activeTask.id : 'general'
+
     setSession((prev) =>
       prev
         ? { ...prev, isRunning: true }
-        : { ...MOCK_FOCUS_SESSION, isRunning: true, elapsedSeconds: 0 },
+        : {
+            taskTitle,
+            taskId,
+            startedAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+            durationMinutes: 45,
+            elapsedSeconds: 0,
+            isRunning: true,
+          }
     )
-  }, [])
+  }, [tasks])
 
   const handlePause = useCallback(() => {
     setSession((prev) => (prev ? { ...prev, isRunning: false } : null))
@@ -52,50 +69,53 @@ export default function Dashboard({ onLock }: DashboardProps) {
   }, [])
 
   const handleLock = useCallback(() => {
-    localStorage.removeItem('bearer_token')
     onLock?.()
   }, [onLock])
 
   // ── Intervention Handlers ────────────────────────────────
-  const handleAcceptDraft = useCallback((draftText: string) => {
-    // Append draft body text to selected task description, set status to in_progress
-    setTasks(prev => prev.map(t => {
-      // Hardcode applying it to the first active/critical task for this mockup
-      if (t.id === 't1') {
-        return {
-          ...t,
-          status: 'in_progress',
-          description: (t.description || '') + '\n\n## AI Generated Draft\n\n' + draftText
-        }
-      }
-      return t
-    }))
-    setActiveIntervention(null)
-  }, [])
-
-  const handleConfirmSlots = useCallback(() => {
-    // Generate a new focus block entry and update central timeline
-    const newEntry: TimelineEntry = {
-      id: `e${Date.now()}`,
-      time: '03:00 PM',
-      label: 'New Focus Block',
-      kind: 'focus',
-      durationMinutes: 45
+  const handleAcceptDraft = useCallback(async () => {
+    if (!activeIntervention) return
+    try {
+      await updateInterventionStatus(activeIntervention.id, 'accepted')
+      await fetchTasks()
+      await fetchFocusBlocks()
+      await fetchInterventions()
+    } catch (err) {
+      console.error('Failed to accept draft:', err)
     }
-    setTimeline(prev => [...prev, newEntry])
-    setActiveIntervention(null)
-  }, [])
+  }, [activeIntervention, updateInterventionStatus, fetchTasks, fetchFocusBlocks, fetchInterventions])
 
-  const handleSnoozeIntervention = useCallback(() => {
-    if (activeIntervention) {
-      setActiveIntervention({ ...activeIntervention, status: 'snoozed' })
-      setTimeout(() => setActiveIntervention(null), 300) // allow exit animation
+  const handleConfirmSlots = useCallback(async () => {
+    if (!activeIntervention) return
+    try {
+      await updateInterventionStatus(activeIntervention.id, 'accepted')
+      await fetchTasks()
+      await fetchFocusBlocks()
+      await fetchInterventions()
+    } catch (err) {
+      console.error('Failed to confirm slots:', err)
     }
-  }, [activeIntervention])
+  }, [activeIntervention, updateInterventionStatus, fetchTasks, fetchFocusBlocks, fetchInterventions])
 
-  const handleDismissIntervention = useCallback(() => {
-    setActiveIntervention(null)
-  }, [])
+  const handleSnoozeIntervention = useCallback(async () => {
+    if (!activeIntervention) return
+    try {
+      await updateInterventionStatus(activeIntervention.id, 'snoozed')
+      await fetchInterventions()
+    } catch (err) {
+      console.error('Failed to snooze intervention:', err)
+    }
+  }, [activeIntervention, updateInterventionStatus, fetchInterventions])
+
+  const handleDismissIntervention = useCallback(async () => {
+    if (!activeIntervention) return
+    try {
+      await updateInterventionStatus(activeIntervention.id, 'dismissed')
+      await fetchInterventions()
+    } catch (err) {
+      console.error('Failed to dismiss intervention:', err)
+    }
+  }, [activeIntervention, updateInterventionStatus, fetchInterventions])
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">

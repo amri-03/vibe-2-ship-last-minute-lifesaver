@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 
 /* ──────────────────────────────────────────────────────────
    Gateway.tsx — Onboarding & Lock Screen
@@ -18,59 +19,6 @@ import {
      A) First-Time Setup  (setupCompleted === false)
      B) Lock Screen       (setupCompleted === true, !isAuthenticated)
    ────────────────────────────────────────────────────────── */
-
-// ── API helpers ────────────────────────────────────────────
-
-const API_BASE = 'http://localhost:3000/api/auth'
-
-interface AuthStatus {
-  setupCompleted: boolean
-  isAuthenticated: boolean
-}
-
-async function fetchAuthStatus(): Promise<AuthStatus> {
-  try {
-    const res = await fetch(`${API_BASE}/status`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('bearer_token') ?? ''}` },
-    })
-    if (!res.ok) throw new Error('Status check failed')
-    return await res.json()
-  } catch {
-    // Fallback for dev / offline — default to onboarding
-    return { setupCompleted: false, isAuthenticated: false }
-  }
-}
-
-async function postSetup(payload: {
-  masterPassword: string
-  geminiApiKey?: string
-}): Promise<{ token: string }> {
-  const res = await fetch(`${API_BASE}/setup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: 'Setup failed' }))
-    throw new Error(err.message ?? 'Setup failed')
-  }
-  return res.json()
-}
-
-async function postLogin(payload: {
-  masterPassword: string
-}): Promise<{ token: string }> {
-  const res = await fetch(`${API_BASE}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: 'Authentication failed' }))
-    throw new Error(err.message ?? 'Authentication failed')
-  }
-  return res.json()
-}
 
 // ── Validation helpers ─────────────────────────────────────
 
@@ -150,15 +98,19 @@ function FormLabel({ htmlFor, children }: { htmlFor: string; children: React.Rea
 // ── Main Gateway Component ─────────────────────────────────
 
 export default function Gateway() {
-  // ── Auth state ───────────────────────────────────────────
-  const [loading, setLoading] = useState(true)
-  const [setupCompleted, setSetupCompleted] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const {
+    setupCompleted,
+    isAuthenticated,
+    loading,
+    error,
+    login,
+    setup,
+    googleConnected,
+  } = useAuth()
 
   // ── Form state ───────────────────────────────────────────
   const [masterPassword, setMasterPassword] = useState('')
   const [geminiApiKey, setGeminiApiKey] = useState('')
-  const [googleConnected] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -166,14 +118,12 @@ export default function Gateway() {
   const [passwordTouched, setPasswordTouched] = useState(false)
   const [geminiTouched, setGeminiTouched] = useState(false)
 
-  // ── Fetch initial auth status ────────────────────────────
+  // Sync contextual errors to form errors
   useEffect(() => {
-    fetchAuthStatus().then((status) => {
-      setSetupCompleted(status.setupCompleted)
-      setIsAuthenticated(status.isAuthenticated)
-      setLoading(false)
-    })
-  }, [])
+    if (error) {
+      setFormError(error)
+    }
+  }, [error])
 
   // ── Derived validation ───────────────────────────────────
   const passwordError = passwordTouched ? validatePassword(masterPassword) : null
@@ -200,19 +150,14 @@ export default function Gateway() {
       setSubmitting(true)
       setFormError(null)
       try {
-        const payload: { masterPassword: string; geminiApiKey?: string } = { masterPassword }
-        if (geminiApiKey.length > 0) payload.geminiApiKey = geminiApiKey
-        const { token } = await postSetup(payload)
-        localStorage.setItem('bearer_token', token)
-        setIsAuthenticated(true)
-        setSetupCompleted(true)
-      } catch (err) {
-        setFormError(err instanceof Error ? err.message : 'Setup failed. Please try again.')
+        await setup(masterPassword, geminiApiKey)
+      } catch (err: any) {
+        setFormError(err.message || 'Setup failed. Please try again.')
       } finally {
         setSubmitting(false)
       }
     },
-    [masterPassword, geminiApiKey, isSetupValid],
+    [masterPassword, geminiApiKey, isSetupValid, setup],
   )
 
   const handleLogin = useCallback(
@@ -224,16 +169,14 @@ export default function Gateway() {
       setSubmitting(true)
       setFormError(null)
       try {
-        const { token } = await postLogin({ masterPassword })
-        localStorage.setItem('bearer_token', token)
-        setIsAuthenticated(true)
-      } catch (err) {
-        setFormError(err instanceof Error ? err.message : 'Login failed. Please try again.')
+        await login(masterPassword)
+      } catch (err: any) {
+        setFormError(err.message || 'Login failed. Please try again.')
       } finally {
         setSubmitting(false)
       }
     },
-    [masterPassword, isLoginValid],
+    [masterPassword, isLoginValid, login],
   )
 
   // ── Loading state ────────────────────────────────────────
