@@ -260,6 +260,21 @@ export const syncCalendar = async (req: Request, res: Response): Promise<void> =
       }
     }
 
+    // 4. Snooze Self-Heal Audit
+    const { data: snoozedInterventions } = await supabase
+      .from('ai_interventions')
+      .select('id')
+      .eq('status', 'snoozed')
+      .lte('snoozed_until', now);
+      
+    if (snoozedInterventions && snoozedInterventions.length > 0) {
+      const snoozedIds = snoozedInterventions.map(i => i.id);
+      await supabase
+        .from('ai_interventions')
+        .update({ status: 'pending', snoozed_until: null })
+        .in('id', snoozedIds);
+    }
+
     res.status(200).json({
       success: true,
       pulledEventsCount,

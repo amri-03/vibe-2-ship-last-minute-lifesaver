@@ -1,15 +1,12 @@
 import { Router } from 'express';
+import { generateInterventions, updateInterventionStatus } from '../controllers/interventions';
+import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
 
-// POST /api/interventions/generate
-router.post('/generate', (req, res) => {
-  res.status(501).json({ message: 'Generate interventions not implemented' });
-});
+router.use(authenticateJWT);
 
-// PATCH /api/interventions/:id/status
-router.patch('/:id/status', (req, res) => {
-  res.status(501).json({ message: 'Update intervention status not implemented' });
-});
+router.post('/generate', generateInterventions);
+router.patch('/:id/status', updateInterventionStatus);
 
 export default router;
