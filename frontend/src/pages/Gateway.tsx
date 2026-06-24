@@ -106,6 +106,7 @@ export default function Gateway() {
     login,
     setup,
     googleConnected,
+    checkAuth,
   } = useAuth()
 
   // ── Form state ───────────────────────────────────────────
@@ -179,6 +180,29 @@ export default function Gateway() {
     [masterPassword, isLoginValid, login],
   )
 
+  const handleRunDemo = useCallback(async () => {
+    setSubmitting(true)
+    setFormError(null)
+    try {
+      const res = await fetch('http://localhost:3000/api/auth/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+      if (!res.ok) {
+        throw new Error('Failed to seed demo data.')
+      }
+      const data = await res.json()
+      if (data.token) {
+        localStorage.setItem('bearer_token', data.token)
+        await checkAuth()
+      }
+    } catch (err: any) {
+      setFormError(err.message || 'Failed to run demo.')
+    } finally {
+      setSubmitting(false)
+    }
+  }, [checkAuth])
+
   // ── Loading state ────────────────────────────────────────
   if (loading) {
     return (
@@ -230,7 +254,8 @@ export default function Gateway() {
           /* ════════════════════════════════════════════════
              STATE A — First-Time Onboarding
              ════════════════════════════════════════════════ */
-          <form onSubmit={handleSetup} className="space-y-6">
+          <>
+            <form onSubmit={handleSetup} className="space-y-6">
             {/* Brand header */}
             <div className="text-center space-y-2 mb-2">
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
@@ -413,7 +438,26 @@ export default function Gateway() {
               )}
             </button>
           </form>
-        ) : (
+
+          <button
+            type="button"
+            onClick={handleRunDemo}
+            disabled={submitting}
+            className="
+              w-full flex items-center justify-center gap-2 mt-4
+              rounded-lg border border-horizon/30 bg-horizon/5 px-4 py-3
+              font-jakarta text-sm font-semibold text-horizon
+              transition-all duration-300
+              hover:bg-horizon/10 hover:-translate-y-px hover:shadow-sm
+              active:translate-y-0
+              disabled:opacity-50 disabled:pointer-events-none
+            "
+          >
+            <Sparkles size={16} />
+            Run Demo with Seeded Data
+          </button>
+        </>
+      ) : (
           /* ════════════════════════════════════════════════
              STATE B — Lock Screen
              ════════════════════════════════════════════════ */

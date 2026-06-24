@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { supabase } from '../services/supabase';
 import { encrypt } from '../services/encryption';
 import { google } from 'googleapis';
@@ -261,6 +262,221 @@ export const googleAuthCallback = async (req: Request, res: Response): Promise<v
   } catch (error) {
     console.error('Google OAuth callback error:', error);
     res.redirect('http://localhost:5173/settings?auth=error');
+  }
+};
+
+export const seedDemoData = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // 1. Clear database tables under profile_id = 1
+    await supabase.from('ai_interventions').delete().eq('profile_id', 1);
+    await supabase.from('focus_blocks').delete().eq('profile_id', 1);
+    await supabase.from('tasks').delete().eq('profile_id', 1);
+
+    // Check if profile exists, keep existing gemini_api_key if present
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('gemini_api_key')
+      .eq('id', 1)
+      .maybeSingle();
+
+    const geminiKey = existingProfile?.gemini_api_key || null;
+    const passwordHash = await bcrypt.hash('password123', 10);
+
+    // Re-create profile ID = 1
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: 1,
+        master_password_hash: passwordHash,
+        google_oauth_access_token: null,
+        google_oauth_refresh_token: null,
+        google_oauth_expires_at: null,
+        google_user_email: null,
+        gemini_api_key: geminiKey
+      });
+
+    if (profileError) throw profileError;
+
+    // 2. Seed 5 realistic tasks
+    const taskId1 = crypto.randomUUID();
+    const taskId2 = crypto.randomUUID();
+    const taskId3 = crypto.randomUUID();
+    const taskId4 = crypto.randomUUID();
+    const taskId5 = crypto.randomUUID();
+
+    const now = new Date();
+
+    const tasksToInsert = [
+      {
+        id: taskId1,
+        profile_id: 1,
+        title: 'Prepare Board Presentation Slides',
+        description: 'Prepare Q2 progress report, system architecture slides, and product milestones for the upcoming executive review.',
+        estimated_duration_minutes: 90,
+        priority_severity: 'critical',
+        status: 'in_progress',
+        due_at: new Date(now.getTime() + 4 * 3600000).toISOString() // due in 4 hours
+      },
+      {
+        id: taskId2,
+        profile_id: 1,
+        title: 'Review Auth Middleware PR',
+        description: 'Verify bcrypt implementation, check token expiration, and validate CSRF token rotation helpers.',
+        estimated_duration_minutes: 40,
+        priority_severity: 'high',
+        status: 'backlog',
+        due_at: new Date(now.getTime() + 10 * 3600000).toISOString() // due in 10 hours
+      },
+      {
+        id: taskId3,
+        profile_id: 1,
+        title: 'Draft Standup Notes',
+        description: 'Draft recap of sprint accomplishments, current roadblocks, and tomorrow\'s task prioritization.',
+        estimated_duration_minutes: 15,
+        priority_severity: 'medium',
+        status: 'backlog',
+        due_at: new Date(now.getTime() + 24 * 3600000).toISOString() // due in 24 hours
+      },
+      {
+        id: taskId4,
+        profile_id: 1,
+        title: 'Update Figma Design System',
+        description: 'Align tailwind brand color tokens, configure Outfit/Plus Jakarta Sans type hierarchies, and build card component assets.',
+        estimated_duration_minutes: 60,
+        priority_severity: 'medium',
+        status: 'completed',
+        completed_at: new Date(now.getTime() - 5 * 3600000).toISOString() // completed 5 hours ago
+      },
+      {
+        id: taskId5,
+        profile_id: 1,
+        title: 'Fix Docker container timezone configuration',
+        description: 'Ensure backend server logging output timezone matches the localized user timezone settings.',
+        estimated_duration_minutes: 25,
+        priority_severity: 'low',
+        status: 'backlog'
+      }
+    ];
+
+    const { error: tasksError } = await supabase.from('tasks').insert(tasksToInsert);
+    if (tasksError) throw tasksError;
+
+    // 3. Seed 5 focus blocks
+    const focusBlocksToInsert = [
+      {
+        profile_id: 1,
+        task_id: taskId2,
+        title: 'Focus Block: Review Auth Middleware PR',
+        start_time: new Date(now.getTime() - 4 * 3600000).toISOString(), // 4 hours ago
+        end_time: new Date(now.getTime() - 3.25 * 3600000).toISOString(), // 3.25 hours ago (45 mins block)
+        status: 'completed',
+        google_event_id: 'gcal_seed_1'
+      },
+      {
+        profile_id: 1,
+        task_id: taskId3,
+        title: 'Focus Block: Draft Standup Notes',
+        start_time: new Date(now.getTime() - 2.5 * 3600000).toISOString(), // 2.5 hours ago
+        end_time: new Date(now.getTime() - 2 * 3600000).toISOString(), // 2 hours ago (30 mins block)
+        status: 'missed',
+        google_event_id: 'gcal_seed_2'
+      },
+      {
+        profile_id: 1,
+        task_id: taskId1,
+        title: 'Focus Block: Prepare Board Presentation Slides',
+        start_time: new Date(now.getTime() - 15 * 60000).toISOString(), // 15 mins ago
+        end_time: new Date(now.getTime() + 45 * 60000).toISOString(), // 45 mins from now
+        status: 'active',
+        google_event_id: 'gcal_seed_3'
+      },
+      {
+        profile_id: 1,
+        task_id: taskId1,
+        title: 'Focus Block: Prepare Board Presentation Slides',
+        start_time: new Date(now.getTime() + 3 * 3600000).toISOString(), // 3 hours from now
+        end_time: new Date(now.getTime() + 4 * 3600000).toISOString(), // 4 hours from now
+        status: 'scheduled',
+        google_event_id: 'gcal_seed_4'
+      },
+      {
+        profile_id: 1,
+        task_id: taskId4,
+        title: 'Focus Block: Figma Style Guide',
+        start_time: new Date(now.getTime() + 24 * 3600000).toISOString(), // 24 hours from now
+        end_time: new Date(now.getTime() + 25 * 3600000).toISOString(), // 25 hours from now
+        status: 'scheduled',
+        google_event_id: 'gcal_seed_5'
+      }
+    ];
+
+    const { error: blocksError } = await supabase.from('focus_blocks').insert(focusBlocksToInsert);
+    if (blocksError) throw blocksError;
+
+    // 4. Seed 2 pending AI interventions
+    const interventionsToInsert = [
+      {
+        profile_id: 1,
+        task_id: taskId1,
+        type: 'draft_proposal',
+        status: 'pending',
+        trigger_reason: 'Impending deadline for critical task: Prepare Board Presentation Slides (due in 4 hours)',
+        content_payload: {
+          title: 'AI Draft Outline: Board Presentation',
+          body: `### Executive Board Presentation Outline
+
+1. **Q2 Summary & Key Achievements**
+   - Finished Core Frontend React Component verify loops.
+   - Handled full authentication middleware setup checks.
+   - Synchronized timeline events with 100% write-through accuracy.
+
+2. **System Architecture Refresh**
+   - Implemented database-side Check Constraints.
+   - Seamless token validation using pre-request Google OAuth handlers.
+
+3. **Risk Management & Mitigations**
+   - Real-time rescheduling intervention cards powered by Gemini.
+   - Automated self-healing Cron loops for snoozed proposals.`,
+          format: 'markdown'
+        }
+      },
+      {
+        profile_id: 1,
+        task_id: taskId3,
+        type: 'scheduling_proposal',
+        status: 'pending',
+        trigger_reason: 'Missed focus block: Draft Standup Notes',
+        content_payload: {
+          title: 'AI Proposed Rescheduling Slots',
+          message: 'I detected you missed your scheduled focus block for standup notes. I scanned your calendar allocations and identified the following open slots:',
+          proposedSlots: [
+            {
+              startTime: new Date(now.getTime() + 1.5 * 3600000).toISOString(), // in 1.5 hours
+              endTime: new Date(now.getTime() + 2 * 3600000).toISOString()
+            },
+            {
+              startTime: new Date(now.getTime() + 5.5 * 3600000).toISOString(), // in 5.5 hours
+              endTime: new Date(now.getTime() + 6 * 3600000).toISOString()
+            }
+          ]
+        }
+      }
+    ];
+
+    const { error: interventionsError } = await supabase.from('ai_interventions').insert(interventionsToInsert);
+    if (interventionsError) throw interventionsError;
+
+    // 5. Issue JWT
+    const token = jwt.sign({ id: 1 }, JWT_SECRET, { expiresIn: '2h' });
+
+    res.status(201).json({
+      success: true,
+      token,
+      message: 'Demo dataset successfully seeded!'
+    });
+  } catch (error) {
+    console.error('Seed demo data error:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Failed to seed demo data.' });
   }
 };
 

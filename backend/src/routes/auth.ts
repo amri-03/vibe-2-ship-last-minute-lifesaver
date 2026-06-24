@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { setup, login, status, googleAuthRedirect, googleAuthCallback } from '../controllers/auth';
+import { setup, login, status, googleAuthRedirect, googleAuthCallback, seedDemoData } from '../controllers/auth';
 import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
@@ -9,6 +9,9 @@ router.post('/setup', setup);
 
 // POST /api/auth/login
 router.post('/login', login);
+
+// POST /api/auth/seed
+router.post('/seed', seedDemoData);
 
 // GET /api/auth/status
 router.get('/status', status);

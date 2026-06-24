@@ -217,7 +217,7 @@ export const syncCalendar = async (req: Request, res: Response): Promise<void> =
     }
 
     // 2. Database -> Google Reconcile (Blocks without google_event_id)
-    const blocksWithoutGoogleId = localBlocks.filter(b => !b.google_event_id && b.status !== 'cancelled');
+    const blocksWithoutGoogleId = (localBlocks || []).filter((b: any) => !b.google_event_id && b.status !== 'cancelled');
     for (const block of blocksWithoutGoogleId) {
       const eventResult = await calendar.events.insert({
         calendarId: 'primary',
@@ -240,7 +240,7 @@ export const syncCalendar = async (req: Request, res: Response): Promise<void> =
       .in('status', ['scheduled', 'active']);
 
     if (expiredBlocks && expiredBlocks.length > 0) {
-      const taskIds = expiredBlocks.map(b => b.task_id).filter(Boolean) as string[];
+      const taskIds = expiredBlocks.map((b: any) => b.task_id).filter(Boolean) as string[];
       let uncompletedTaskIds = new Set<string>();
       if (taskIds.length > 0) {
          const { data: uncompletedTasks } = await supabase
@@ -249,12 +249,12 @@ export const syncCalendar = async (req: Request, res: Response): Promise<void> =
            .in('id', taskIds)
            .neq('status', 'completed');
            
-         uncompletedTasks?.forEach(t => uncompletedTaskIds.add(t.id));
+         uncompletedTasks?.forEach((t: any) => uncompletedTaskIds.add(t.id));
       }
 
-      const blocksToMiss = expiredBlocks.filter(b => !b.task_id || uncompletedTaskIds.has(b.task_id));
+      const blocksToMiss = expiredBlocks.filter((b: any) => !b.task_id || uncompletedTaskIds.has(b.task_id));
       if (blocksToMiss.length > 0) {
-         const blockIdsToMiss = blocksToMiss.map(b => b.id);
+         const blockIdsToMiss = blocksToMiss.map((b: any) => b.id);
          await supabase.from('focus_blocks').update({ status: 'missed' }).in('id', blockIdsToMiss);
          missedBlocksCount += blocksToMiss.length;
       }
@@ -268,7 +268,7 @@ export const syncCalendar = async (req: Request, res: Response): Promise<void> =
       .lte('snoozed_until', now);
       
     if (snoozedInterventions && snoozedInterventions.length > 0) {
-      const snoozedIds = snoozedInterventions.map(i => i.id);
+      const snoozedIds = snoozedInterventions.map((i: any) => i.id);
       await supabase
         .from('ai_interventions')
         .update({ status: 'pending', snoozed_until: null })
