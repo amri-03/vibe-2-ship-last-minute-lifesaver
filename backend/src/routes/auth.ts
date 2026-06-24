@@ -1,30 +1,22 @@
 import { Router } from 'express';
+import { setup, login, status, googleAuthRedirect, googleAuthCallback } from '../controllers/auth';
+import { authenticateJWT } from '../middleware/auth';
 
 const router = Router();
 
 // POST /api/auth/setup
-router.post('/setup', (req, res) => {
-  res.status(501).json({ message: 'Setup not implemented' });
-});
+router.post('/setup', setup);
 
 // POST /api/auth/login
-router.post('/login', (req, res) => {
-  res.status(501).json({ message: 'Login not implemented' });
-});
+router.post('/login', login);
 
 // GET /api/auth/status
-router.get('/status', (req, res) => {
-  res.status(501).json({ message: 'Status check not implemented' });
-});
+router.get('/status', status);
 
 // GET /api/auth/google
-router.get('/google', (req, res) => {
-  res.status(501).json({ message: 'Google OAuth login redirect not implemented' });
-});
+router.get('/google', authenticateJWT, googleAuthRedirect);
 
 // GET /api/auth/google/callback
-router.get('/google/callback', (req, res) => {
-  res.status(501).json({ message: 'Google OAuth callback not implemented' });
-});
+router.get('/google/callback', googleAuthCallback);
 
 export default router;

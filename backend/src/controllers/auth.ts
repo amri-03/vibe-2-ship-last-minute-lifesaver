@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { supabase } from '../services/supabase';
 import { encrypt } from '../services/encryption';
+import { google } from 'googleapis';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -185,3 +186,81 @@ export const status = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Internal server error during status check.' });
   }
 };
+
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
+
+export const googleAuthRedirect = (req: Request, res: Response): void => {
+  const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+
+  const url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'consent',
+    scope: [
+      'openid',
+      'email',
+      'https://www.googleapis.com/auth/calendar',
+      'https://www.googleapis.com/auth/calendar.events',
+    ],
+  });
+
+  res.redirect(url);
+};
+
+export const googleAuthCallback = async (req: Request, res: Response): Promise<void> => {
+  const code = req.query.code as string;
+
+  if (!code) {
+    res.redirect('http://localhost:5173/settings?auth=error');
+    return;
+  }
+
+  try {
+    const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    // Get email
+    const oauth2 = google.oauth2({ auth: oauth2Client, version: 'v2' });
+    const userInfo = await oauth2.userinfo.get();
+    const email = userInfo.data.email;
+
+    if (!tokens.access_token || !tokens.refresh_token) {
+      throw new Error('Access or Refresh Token is missing from Google response.');
+    }
+
+    const encryptedAccessToken = encrypt(tokens.access_token);
+    const encryptedRefreshToken = encrypt(tokens.refresh_token);
+
+    // Calculate expiration date
+    const expiresAt = new Date();
+    if (tokens.expiry_date) {
+      expiresAt.setTime(tokens.expiry_date);
+    } else {
+      expiresAt.setSeconds(expiresAt.getSeconds() + 3600);
+    }
+
+    // Update database
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        google_oauth_access_token: encryptedAccessToken,
+        google_oauth_refresh_token: encryptedRefreshToken,
+        google_oauth_expires_at: expiresAt.toISOString(),
+        google_user_email: email,
+      })
+      .eq('id', 1);
+
+    if (updateError) {
+      console.error('Database update error:', updateError);
+      throw updateError;
+    }
+
+    res.redirect('http://localhost:5173/?auth=google_success');
+  } catch (error) {
+    console.error('Google OAuth callback error:', error);
+    res.redirect('http://localhost:5173/settings?auth=error');
+  }
+};
+
