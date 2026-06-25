@@ -60,7 +60,7 @@ function PasswordInput({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/60 hover:text-ink transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/60 hover:text-ink cursor-pointer transition-colors"
           aria-label={visible ? 'Hide password' : 'Show password'}
         >
           {visible ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -358,11 +358,11 @@ export default function Gateway() {
               type="submit"
               disabled={submitting}
               className="
-                w-full flex items-center justify-center gap-2 group
+                w-full flex items-center justify-center gap-2 group cursor-pointer
                 rounded-lg bg-ink px-4 py-3.5
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300 ease-in-out will-change-transform
-                hover:bg-black hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
+                hover:bg-ink hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
                 active:translate-y-0 active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
               "
@@ -429,11 +429,11 @@ export default function Gateway() {
               type="submit"
               disabled={submitting}
               className="
-                w-full flex items-center justify-center gap-2 group
+                w-full flex items-center justify-center gap-2 group cursor-pointer
                 rounded-lg bg-ink px-4 py-3.5
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300 ease-in-out will-change-transform
-                hover:bg-black hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
+                hover:bg-ink hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
                 active:translate-y-0 active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
               "
@@ -455,7 +455,7 @@ export default function Gateway() {
           <button
             type="button"
             onClick={handleToggleState}
-            className="text-sm text-charcoal font-semibold font-jakarta cursor-pointer hover:text-charcoal transition-colors"
+            className="text-base text-charcoal font-semibold font-jakarta cursor-pointer hover:text-charcoal transition-colors"
           >
             {isRegistering
               ? 'Already have an account? Sign in'
@@ -472,12 +472,12 @@ export default function Gateway() {
           onClick={handleRunDemo}
           disabled={submitting}
           className="
-            w-full flex items-center justify-center gap-2
+            w-full flex items-center justify-center gap-2 cursor-pointer
             rounded-lg border border-charcoal/40 bg-charcoal/5 px-4 py-3
             font-jakarta text-sm font-semibold text-charcoal
             transition-all duration-300
-            hover:bg-charcoal/10 hover:text-ink hover:border-charcoal/75 hover:-translate-y-px hover:shadow-sm
-            active:translate-y-0
+            hover:scale-[1.02] hover:-translate-y-px hover:shadow-sm
+            active:translate-y-0 active:scale-100
             disabled:opacity-50 disabled:pointer-events-none
           "
         >
