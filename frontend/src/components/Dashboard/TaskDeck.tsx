@@ -143,7 +143,7 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
       {completed.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-2 px-1">
-            <h3 className="font-lora text-xl font-medium text-charcoal">
+            <h3 className="font-lora text-xl font-medium text-ink">
               Completed
             </h3>
             <span className="text-sm font-jakarta font-semibold text-sage uppercase tracking-wider">

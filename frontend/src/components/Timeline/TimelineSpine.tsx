@@ -56,9 +56,9 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
           const isIntervention = entry.kind === 'intervention'
 
           return (
-            <li key={entry.id} className="relative grid grid-cols-[1fr_auto_1fr] gap-4 items-start py-2">
+            <li key={entry.id} className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-4 items-start py-2">
               {/* ── Left Column: Time Guideline ────────────────── */}
-              <div className="text-right text-sm font-jakarta font-semibold text-charcoal/80 pt-0.5">
+              <div className="text-right text-sm font-jakarta font-semibold text-charcoal pt-0.5">
                 {isIntervention ? (
                   <span className="text-terracotta font-semibold">Suggest</span>
                 ) : (
@@ -85,7 +85,7 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
                     className={
                       isIntervention ? 'text-terracotta flex-shrink-0'
                         : entry.isActive ? 'text-sage flex-shrink-0'
-                        : 'text-charcoal/80 flex-shrink-0'
+                        : 'text-charcoal flex-shrink-0'
                     }
                   />
                   <span

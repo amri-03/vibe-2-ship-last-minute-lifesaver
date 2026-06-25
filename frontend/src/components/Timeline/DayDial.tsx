@@ -16,15 +16,15 @@ interface DayDialProps {
 
 // ── Geometry constants ─────────────────────────────────────
 
-const SIZE = 288          // px  (w-72)
+const SIZE = 320          // px  (w-80)
 const CX = SIZE / 2
 const CY = SIZE / 2
-const OUTER_R = 129        // outer ring
-const ARC_R = 114          // colored arcs
-const TICK_OUTER = 129
-const TICK_INNER = 120
-const LABEL_R = 102
-const DOT_R = 114          // pulsing current-time dot
+const OUTER_R = 143        // outer ring
+const ARC_R = 127          // colored arcs
+const TICK_OUTER = 143
+const TICK_INNER = 133
+const LABEL_R = 113
+const DOT_R = 127          // pulsing current-time dot
 
 // ── Palette lookup ─────────────────────────────────────────
 
@@ -107,7 +107,7 @@ export default function DayDial({
         width={SIZE}
         height={SIZE}
         viewBox={`0 0 ${SIZE} ${SIZE}`}
-        className="select-none w-72 h-72"
+        className="select-none w-80 h-80"
       >
         {/* ── Outer ring ──────────────────────────────── */}
         <circle
@@ -115,7 +115,7 @@ export default function DayDial({
           fill="none"
           stroke="var(--color-paper-border)"
           strokeWidth={4}
-          opacity={0.8}
+          opacity={1}
         />
 
         {/* ── Inner subtle ring ───────────────────────── */}
@@ -124,7 +124,7 @@ export default function DayDial({
           fill="none"
           stroke="var(--color-paper-border)"
           strokeWidth={2}
-          opacity={0.5}
+          opacity={0.8}
           strokeDasharray="4 6"
         />
 
@@ -147,9 +147,9 @@ export default function DayDial({
             <line
               x1={innerPt.x} y1={innerPt.y}
               x2={outerPt.x} y2={outerPt.y}
-              stroke="var(--color-charcoal)"
+              stroke="#4A4C56"
               strokeWidth={isMajor ? 2.5 : 1.2}
-              opacity={isMajor ? 0.7 : 0.4}
+              opacity={1}
             />
             {isMajor && (
               <text
@@ -157,10 +157,11 @@ export default function DayDial({
                 y={labelPt.y}
                 textAnchor="middle"
                 dominantBaseline="central"
-                className="fill-charcoal font-jakarta"
+                fill="#4A4C56"
+                className="font-jakarta"
                 fontSize={13}
                 fontWeight={600}
-                opacity={0.8}
+                opacity={1}
               >
                 {h > 12 ? `${h - 12}p` : h === 12 ? '12p' : `${h}a`}
               </text>
@@ -173,7 +174,7 @@ export default function DayDial({
           x={CX} y={CY - 10}
           textAnchor="middle"
           className="fill-ink font-lora font-bold"
-          fontSize={48}
+          fontSize={60}
         >
           {Math.floor(currentHour) > 12
             ? `${Math.floor(currentHour) - 12}`
@@ -183,10 +184,11 @@ export default function DayDial({
         <text
           x={CX} y={CY + 30}
           textAnchor="middle"
-          className="fill-charcoal font-jakarta font-semibold"
+          fill="#4A4C56"
+          className="font-jakarta font-semibold"
           fontSize={12}
           letterSpacing={2}
-          opacity={0.8}
+          opacity={1}
         >
           {currentHour >= 12 ? 'PM' : 'AM'}
         </text>

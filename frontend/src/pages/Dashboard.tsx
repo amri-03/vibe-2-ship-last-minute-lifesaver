@@ -122,7 +122,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
   }, [activeIntervention, updateInterventionStatus, fetchInterventions])
 
   return (
-    <div className="w-screen min-h-screen lg:h-screen lg:overflow-hidden px-12 py-8 flex flex-col bg-canvas">
+    <div className="w-screen min-h-screen lg:h-screen lg:overflow-hidden px-12 py-8 flex flex-col bg-canvas lg:min-h-0">
       {/* ════════════════════════════════════════════════════
           Header Bar
           ════════════════════════════════════════════════════ */}
@@ -187,8 +187,8 @@ export default function Dashboard({ onLock }: DashboardProps) {
       {/* ════════════════════════════════════════════════════
           Main Content — Split Grid
           ════════════════════════════════════════════════════ */}
-      <main className="flex-1 w-full flex flex-col lg:overflow-hidden">
-        <div className="flex flex-col lg:flex-row gap-12 flex-1 lg:overflow-hidden">
+      <main className="flex-1 w-full flex flex-col lg:overflow-hidden min-h-0">
+        <div className="flex flex-col lg:flex-row gap-12 flex-1 lg:overflow-hidden min-h-0">
 
           {/* ── THE CHRONICLE (Left Column) ────────────── */}
           <aside
@@ -196,7 +196,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               w-full lg:w-[28%]
               border-b lg:border-b-0 lg:border-r border-paper-border
               bg-card-linen/40
-              flex flex-col lg:h-full lg:overflow-hidden
+              flex flex-col lg:h-full lg:overflow-hidden min-h-0
             "
           >
             {/* Header + Clock (Fixed) */}
@@ -227,13 +227,13 @@ export default function Dashboard({ onLock }: DashboardProps) {
             </div>
 
             {/* Timeline Spine (Scrollable) */}
-            <div className="flex-1 lg:overflow-y-auto overflow-x-hidden px-5 pb-5">
+            <div className="flex-1 lg:overflow-y-auto overflow-x-hidden no-scrollbar px-5 pb-5">
               <TimelineSpine entries={timeline} />
             </div>
           </aside>
 
           {/* ── THE FOCUS STAGE (Right Column) ─────────── */}
-          <section className="w-full lg:w-[72%] flex flex-col lg:h-full lg:overflow-hidden">
+          <section className="w-full lg:w-[72%] flex flex-col lg:h-full lg:overflow-hidden min-h-0">
             {/* Active Focus Card (Fixed) */}
             <div className="flex-shrink-0">
               <ActiveFocusCard
