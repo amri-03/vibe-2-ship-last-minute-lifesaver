@@ -79,14 +79,14 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
               {/* ── Entry card ───────────────────────── */}
               <div
                 className={`
-                  flex-1 rounded-lg px-5 py-4 transition-colors duration-200
+                  flex-1 min-w-0 rounded-lg px-5 py-4 transition-colors duration-200
                   ${isIntervention
                     ? 'border border-dashed border-terracotta/30 bg-terracotta/5'
                     : `${config.bg} group-hover:bg-card-linen`
                   }
                 `}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between min-w-0 gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <Icon
                       size={15}

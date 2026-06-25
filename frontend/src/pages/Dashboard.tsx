@@ -227,7 +227,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
             </div>
 
             {/* Timeline Spine (Scrollable) */}
-            <div className="flex-1 overflow-y-auto px-5 pb-5">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-5">
               <TimelineSpine entries={timeline} />
             </div>
           </aside>
