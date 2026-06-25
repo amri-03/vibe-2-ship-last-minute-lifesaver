@@ -17,7 +17,7 @@ router.post('/seed', seedDemoData);
 router.get('/status', status);
 
 // GET /api/auth/google
-router.get('/google', authenticateJWT, googleAuthRedirect);
+router.get('/google', googleAuthRedirect);
 
 // GET /api/auth/google/callback
 router.get('/google/callback', googleAuthCallback);

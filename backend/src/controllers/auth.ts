@@ -201,8 +201,30 @@ const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
 
 export const googleAuthRedirect = (req: Request, res: Response): void => {
+  const authHeader = req.headers.authorization;
+  let token = '';
+
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token as string;
+  }
+
+  if (!token) {
+    res.redirect('http://localhost:5173/?auth_error=unauthorized');
+    return;
+  }
+
+  let userId: string | null = null;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    userId = decoded.id;
+  } catch (error) {
+    res.redirect('http://localhost:5173/?auth_error=unauthorized');
+    return;
+  }
+
   const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
-  const userId = (req as any).user?.id;
 
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',

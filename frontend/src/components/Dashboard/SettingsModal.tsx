@@ -31,7 +31,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     try {
       const response = await api.get('/auth/google')
       if (response.data && response.data.url) {
-        window.location.href = response.data.url
+        window.location.replace(response.data.url)
       } else {
         throw new Error('Google authorization URL not returned.')
       }
