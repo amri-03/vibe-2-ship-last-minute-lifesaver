@@ -14,10 +14,10 @@ interface TaskDeckProps {
 // ── Priority badge styling ─────────────────────────────────
 
 const PRIORITY_CLASSES: Record<Priority, string> = {
-  critical: 'bg-terracotta/12 text-terracotta border-terracotta/20',
-  high:     'bg-terracotta/8 text-terracotta/80 border-terracotta/15',
-  medium:   'bg-horizon/10 text-horizon border-horizon/20',
-  low:      'bg-paper-border/40 text-charcoal border-paper-border',
+  critical: 'bg-terracotta/15 text-terracotta border-terracotta/30',
+  high:     'bg-terracotta/10 text-terracotta border-terracotta/25',
+  medium:   'bg-horizon/15 text-horizon border-horizon/30',
+  low:      'bg-paper-border text-charcoal border-paper-border/80',
 }
 
 // ── Status icon ────────────────────────────────────────────
@@ -25,7 +25,7 @@ const PRIORITY_CLASSES: Record<Priority, string> = {
 function StatusIcon({ status }: { status: TaskStatus }) {
   switch (status) {
     case 'completed':
-      return <CheckCircle2 size={15} className="text-sage flex-shrink-0" />
+      return <CheckCircle2 size={16} className="text-sage flex-shrink-0" />
     case 'active':
     case 'in_progress':
       return (
@@ -35,7 +35,7 @@ function StatusIcon({ status }: { status: TaskStatus }) {
         </span>
       )
     default:
-      return <Circle size={15} className="text-charcoal/30 flex-shrink-0" />
+      return <Circle size={16} className="text-charcoal/40 flex-shrink-0" />
   }
 }
 
@@ -47,7 +47,7 @@ function TaskRow({ task }: { task: Task }) {
   return (
     <li
       className={`
-        group flex items-center gap-3 rounded-lg px-3.5 py-3
+        group flex items-center gap-3 rounded-lg px-5 py-4
         transition-colors duration-200 cursor-default
         ${isCompleted ? 'opacity-60' : 'hover:bg-card-linen'}
       `}
@@ -64,26 +64,26 @@ function TaskRow({ task }: { task: Task }) {
           {task.title}
         </p>
         {task.dueLabel && !isCompleted && (
-          <p className="flex items-center gap-1 mt-0.5 text-[10px] font-jakarta text-charcoal/60">
-            <Clock size={9} />
+          <p className="flex items-center gap-1.5 mt-1 text-sm font-jakarta text-charcoal">
+            <Clock size={11} className="flex-shrink-0" />
             {task.dueLabel}
           </p>
         )}
       </div>
 
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className="text-[10px] font-jakarta tabular-nums text-charcoal/50">
+        <span className="text-sm font-jakarta font-medium tabular-nums text-charcoal">
           {formatMinutes(task.estimatedMinutes)}
         </span>
         <span
           className={`
             inline-flex items-center rounded-full border
-            px-2 py-0.5 text-[9px] font-jakarta font-semibold uppercase tracking-wide
+            px-2.5 py-1 text-xs font-jakarta font-semibold uppercase tracking-wide
             ${PRIORITY_CLASSES[task.priority]}
           `}
         >
           {task.priority === 'critical' && (
-            <AlertTriangle size={8} className="mr-0.5" />
+            <AlertTriangle size={10} className="mr-0.5" />
           )}
           {priorityLabel(task.priority)}
         </span>
@@ -117,10 +117,10 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
       {/* ── Backlog ─────────────────────────────────── */}
       <section>
         <div className="flex items-center justify-between mb-2 px-1">
-          <h3 className="font-lora text-sm font-medium text-ink">
+          <h3 className="font-lora text-xl font-medium text-ink">
             Task Deck
           </h3>
-          <span className="text-[10px] font-jakarta font-medium text-charcoal/50 uppercase tracking-wider">
+          <span className="text-sm font-jakarta font-semibold text-charcoal uppercase tracking-wider">
             {backlog.length} remaining
           </span>
         </div>
@@ -132,7 +132,7 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
               ))}
             </ul>
           ) : (
-            <p className="px-4 py-8 text-center text-sm text-charcoal/50 font-jakarta">
+            <p className="px-4 py-8 text-center text-sm text-charcoal font-jakarta">
               All clear — nothing in the backlog.
             </p>
           )}
@@ -143,10 +143,10 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
       {completed.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-2 px-1">
-            <h3 className="font-lora text-sm font-medium text-charcoal">
+            <h3 className="font-lora text-xl font-medium text-charcoal">
               Completed
             </h3>
-            <span className="text-[10px] font-jakarta font-medium text-sage uppercase tracking-wider">
+            <span className="text-sm font-jakarta font-semibold text-sage uppercase tracking-wider">
               {completed.length} done
             </span>
           </div>

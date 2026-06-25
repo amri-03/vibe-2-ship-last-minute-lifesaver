@@ -122,12 +122,12 @@ export default function Dashboard({ onLock }: DashboardProps) {
   }, [activeIntervention, updateInterventionStatus, fetchInterventions])
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
+    <div className="w-full min-h-screen px-12 py-8 flex flex-col bg-canvas">
       {/* ════════════════════════════════════════════════════
           Header Bar
           ════════════════════════════════════════════════════ */}
-      <header className="border-b border-paper-border bg-card-linen/80 backdrop-blur-sm flex-shrink-0">
-        <div className="mx-auto max-w-[1440px] px-5 py-3.5 flex items-center justify-between">
+      <header className="border-b border-paper-border bg-card-linen/80 backdrop-blur-sm flex-shrink-0 mb-8 rounded-xl shadow-sm">
+        <div className="w-full px-6 py-4 flex items-center justify-between">
           <h1 className="font-lora text-lg font-medium tracking-tight text-ink">
             Life Saver
           </h1>
@@ -137,7 +137,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Companion"
               onClick={() => setIsDrawerOpen(true)}
               className="
-                rounded-lg p-2 text-charcoal/50
+                rounded-lg p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-sage/10 hover:text-sage
               "
@@ -149,7 +149,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Debug"
               onClick={() => setIsDebugOpen(true)}
               className="
-                rounded-lg p-2 text-charcoal/50
+                rounded-lg p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-paper-border/30 hover:text-charcoal
               "
@@ -161,7 +161,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Settings"
               onClick={() => setIsSettingsOpen(true)}
               className="
-                rounded-lg p-2 text-charcoal/50
+                rounded-lg p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-paper-border/30 hover:text-charcoal
               "
@@ -173,7 +173,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Lock workspace"
               onClick={handleLock}
               className="
-                rounded-lg p-2 text-charcoal/50
+                rounded-lg p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-terracotta/10 hover:text-terracotta
               "
@@ -187,13 +187,13 @@ export default function Dashboard({ onLock }: DashboardProps) {
       {/* ════════════════════════════════════════════════════
           Main Content — Split Grid
           ════════════════════════════════════════════════════ */}
-      <main className="flex-1 mx-auto w-full max-w-[1440px]">
-        <div className="flex flex-col lg:flex-row min-h-[calc(100vh-57px)]">
+      <main className="flex-1 w-full flex flex-col">
+        <div className="flex flex-col lg:flex-row gap-12 flex-1">
 
           {/* ── THE CHRONICLE (Left Column) ────────────── */}
           <aside
             className="
-              lg:w-[30%] lg:max-w-[380px] lg:min-w-[280px]
+              w-full lg:w-[28%]
               border-b lg:border-b-0 lg:border-r border-paper-border
               bg-card-linen/40
               overflow-y-auto
@@ -202,10 +202,10 @@ export default function Dashboard({ onLock }: DashboardProps) {
             <div className="p-5 space-y-6">
               {/* Section heading */}
               <div className="flex items-center justify-between">
-                <h2 className="font-lora text-sm font-medium text-charcoal tracking-wide">
+                <h2 className="font-lora text-xl font-medium text-ink tracking-wide">
                   Today's Chronicle
                 </h2>
-                <span className="text-[10px] font-jakarta font-medium text-charcoal/40 uppercase tracking-widest">
+                <span className="text-sm font-jakarta font-semibold text-charcoal uppercase tracking-widest">
                   {new Date().toLocaleDateString('en-US', {
                     weekday: 'short',
                     month: 'short',
@@ -231,8 +231,8 @@ export default function Dashboard({ onLock }: DashboardProps) {
           </aside>
 
           {/* ── THE FOCUS STAGE (Right Column) ─────────── */}
-          <section className="flex-1 overflow-y-auto">
-            <div className="p-5 lg:p-8 space-y-8 max-w-3xl">
+          <section className="w-full lg:w-[72%] overflow-y-auto">
+            <div className="space-y-8 w-full">
               {/* Active Focus Card */}
               <ActiveFocusCard
                 session={session}

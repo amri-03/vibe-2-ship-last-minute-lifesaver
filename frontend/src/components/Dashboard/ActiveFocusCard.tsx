@@ -45,13 +45,13 @@ export default function ActiveFocusCard({
   // ── Resting state (no active session) ────────────────────
   if (!session) {
     return (
-      <div className="rounded-2xl border border-paper-border bg-card-linen p-8 sm:p-10">
+      <div className="rounded-2xl border border-paper-border bg-card-linen p-10 lg:p-12">
         <div className="flex flex-col items-center text-center py-8 space-y-5">
           <div className="w-14 h-14 rounded-full bg-sage/10 flex items-center justify-center">
             <Target size={24} className="text-sage" />
           </div>
           <div className="space-y-2">
-            <h2 className="font-lora text-xl font-medium text-ink">
+            <h2 className="font-lora text-3xl font-medium text-ink">
               Ready when you are
             </h2>
             <p className="font-jakarta text-sm text-charcoal leading-relaxed max-w-sm">
@@ -64,7 +64,7 @@ export default function ActiveFocusCard({
             onClick={onStart}
             className="
               inline-flex items-center gap-2 rounded-lg
-              bg-ink px-6 py-3 font-jakarta text-sm font-semibold text-white
+              bg-ink px-8 py-4 font-jakarta text-base font-semibold text-white
               transition-all duration-300
               hover:bg-ink/90 hover:-translate-y-px hover:shadow-md
               active:translate-y-0 active:shadow-sm
@@ -89,25 +89,25 @@ export default function ActiveFocusCard({
         />
       </div>
 
-      <div className="p-8 sm:p-10">
+      <div className="p-10 lg:p-12">
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               {session.isRunning && (
-                <span className="relative flex h-2 w-2">
+                <span className="relative flex h-2.5 w-2.5">
                   <span className="absolute inline-flex h-full w-full rounded-full bg-sage opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-sage" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sage" />
                 </span>
               )}
-              <span className="text-[10px] font-jakarta font-semibold uppercase tracking-widest text-sage">
+              <span className="text-sm font-jakarta font-semibold uppercase tracking-widest text-sage">
                 {session.isRunning ? 'Focusing' : 'Paused'}
               </span>
             </div>
-            <h2 className="font-lora text-2xl font-medium text-ink leading-snug">
+            <h2 className="font-lora text-3xl font-medium text-ink leading-snug">
               {session.taskTitle}
             </h2>
-            <p className="font-jakarta text-xs text-charcoal">
+            <p className="font-jakarta text-sm text-charcoal font-medium">
               Started {session.startedAt} · {formatMinutes(session.durationMinutes)} block
             </p>
           </div>
@@ -123,10 +123,10 @@ export default function ActiveFocusCard({
             {formatDuration(elapsed)}
           </span>
           <div className="text-left">
-            <p className="text-[10px] font-jakarta font-medium text-charcoal/60 uppercase tracking-wider">
+            <p className="text-sm font-jakarta font-semibold text-charcoal uppercase tracking-wider">
               remaining
             </p>
-            <p className="font-jakarta text-sm tabular-nums text-charcoal font-medium">
+            <p className="font-jakarta text-base tabular-nums text-charcoal font-semibold">
               {formatDuration(remaining)}
             </p>
           </div>
@@ -139,8 +139,8 @@ export default function ActiveFocusCard({
             onClick={handleToggle}
             className="
               flex-1 inline-flex items-center justify-center gap-2
-              rounded-lg bg-ink px-5 py-3.5
-              font-jakarta text-sm font-semibold text-white
+              rounded-lg bg-ink px-8 py-4
+              font-jakarta text-base font-semibold text-white
               transition-all duration-300
               hover:bg-ink/90 hover:-translate-y-px hover:shadow-md
               active:translate-y-0 active:shadow-sm
@@ -163,8 +163,8 @@ export default function ActiveFocusCard({
             onClick={onSnooze}
             className="
               inline-flex items-center justify-center gap-2
-              rounded-lg border border-paper-border bg-white/60 px-5 py-3.5
-              font-jakarta text-sm font-medium text-charcoal
+              rounded-lg border border-paper-border bg-white/60 px-8 py-4
+              font-jakarta text-base font-semibold text-charcoal
               transition-all duration-300
               hover:bg-white hover:border-charcoal/30 hover:-translate-y-px
               active:translate-y-0
