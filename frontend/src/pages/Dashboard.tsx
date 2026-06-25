@@ -122,7 +122,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
   }, [activeIntervention, updateInterventionStatus, fetchInterventions])
 
   return (
-    <div className="w-full min-h-screen px-12 py-8 flex flex-col bg-canvas">
+    <div className="w-full h-screen px-12 py-8 flex flex-col bg-canvas overflow-hidden">
       {/* ════════════════════════════════════════════════════
           Header Bar
           ════════════════════════════════════════════════════ */}
@@ -187,8 +187,8 @@ export default function Dashboard({ onLock }: DashboardProps) {
       {/* ════════════════════════════════════════════════════
           Main Content — Split Grid
           ════════════════════════════════════════════════════ */}
-      <main className="flex-1 w-full flex flex-col">
-        <div className="flex flex-col lg:flex-row gap-12 flex-1">
+      <main className="flex-1 w-full flex flex-col overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-12 flex-1 overflow-hidden">
 
           {/* ── THE CHRONICLE (Left Column) ────────────── */}
           <aside
@@ -196,11 +196,11 @@ export default function Dashboard({ onLock }: DashboardProps) {
               w-full lg:w-[28%]
               border-b lg:border-b-0 lg:border-r border-paper-border
               bg-card-linen/40
-              overflow-y-auto
+              flex flex-col h-full overflow-hidden
             "
           >
-            <div className="p-5 space-y-6">
-              {/* Section heading */}
+            {/* Header + Clock (Fixed) */}
+            <div className="p-5 flex-shrink-0 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="font-lora text-xl font-medium text-ink tracking-wide">
                   Today's Chronicle
@@ -224,24 +224,28 @@ export default function Dashboard({ onLock }: DashboardProps) {
 
               {/* Divider */}
               <div className="h-px bg-paper-border/50" />
+            </div>
 
-              {/* Timeline Spine */}
+            {/* Timeline Spine (Scrollable) */}
+            <div className="flex-1 overflow-y-auto px-5 pb-5">
               <TimelineSpine entries={timeline} />
             </div>
           </aside>
 
           {/* ── THE FOCUS STAGE (Right Column) ─────────── */}
-          <section className="w-full lg:w-[72%] overflow-y-auto">
-            <div className="space-y-8 w-full">
-              {/* Active Focus Card */}
+          <section className="w-full lg:w-[72%] flex flex-col h-full overflow-hidden">
+            {/* Active Focus Card (Fixed) */}
+            <div className="flex-shrink-0">
               <ActiveFocusCard
                 session={session}
                 onStart={handleStart}
                 onPause={handlePause}
                 onSnooze={handleSnooze}
               />
+            </div>
 
-              {/* Task Deck */}
+            {/* Task Deck (Scrollable) */}
+            <div className="flex-1 overflow-y-auto mt-8 pr-2">
               <TaskDeck tasks={tasks} />
             </div>
           </section>
