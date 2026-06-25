@@ -45,8 +45,8 @@ export default function ActiveFocusCard({
   // ── Resting state (no active session) ────────────────────
   if (!session) {
     return (
-      <div className="rounded-2xl border border-paper-border bg-card-linen p-10 lg:p-12">
-        <div className="flex flex-col items-center text-center py-8 space-y-5">
+      <div className="rounded-2xl border border-paper-border bg-card-linen px-12 py-10">
+        <div className="flex flex-col items-center text-center py-4 space-y-4">
           <div className="w-14 h-14 rounded-full bg-sage/10 flex items-center justify-center">
             <Target size={24} className="text-sage" />
           </div>
@@ -66,7 +66,7 @@ export default function ActiveFocusCard({
               inline-flex items-center gap-2 rounded-lg
               bg-ink px-8 py-4 font-jakarta text-base font-semibold text-white
               transition-all duration-300
-              hover:bg-ink/90 hover:-translate-y-px hover:shadow-md
+              hover:bg-ink/90 hover:-translate-y-0.5 hover:shadow-md
               active:translate-y-0 active:shadow-sm
             "
           >
@@ -89,9 +89,9 @@ export default function ActiveFocusCard({
         />
       </div>
 
-      <div className="p-10 lg:p-12">
+      <div className="px-12 py-10">
         {/* Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex items-start justify-between mb-5">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               {session.isRunning && (
@@ -118,7 +118,7 @@ export default function ActiveFocusCard({
         </div>
 
         {/* Timer display */}
-        <div className="flex items-baseline justify-center gap-3 mb-8">
+        <div className="flex items-baseline justify-center gap-3 mb-5">
           <span className="font-lora text-5xl sm:text-6xl font-medium tabular-nums text-ink tracking-tight">
             {formatDuration(elapsed)}
           </span>
@@ -142,7 +142,7 @@ export default function ActiveFocusCard({
               rounded-lg bg-ink px-8 py-4
               font-jakarta text-base font-semibold text-white
               transition-all duration-300
-              hover:bg-ink/90 hover:-translate-y-px hover:shadow-md
+              hover:bg-ink/90 hover:-translate-y-0.5 hover:shadow-md
               active:translate-y-0 active:shadow-sm
             "
           >
@@ -166,8 +166,8 @@ export default function ActiveFocusCard({
               rounded-lg border border-paper-border bg-white/60 px-8 py-4
               font-jakarta text-base font-semibold text-charcoal
               transition-all duration-300
-              hover:bg-white hover:border-charcoal/30 hover:-translate-y-px
-              active:translate-y-0
+              hover:bg-white hover:border-charcoal/30 hover:-translate-y-0.5 hover:shadow-md
+              active:translate-y-0 active:shadow-sm
             "
           >
             <Moon size={15} />

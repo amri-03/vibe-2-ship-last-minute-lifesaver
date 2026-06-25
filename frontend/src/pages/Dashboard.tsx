@@ -122,12 +122,12 @@ export default function Dashboard({ onLock }: DashboardProps) {
   }, [activeIntervention, updateInterventionStatus, fetchInterventions])
 
   return (
-    <div className="w-full h-screen px-12 py-8 flex flex-col bg-canvas overflow-hidden">
+    <div className="w-screen min-h-screen lg:h-screen lg:overflow-hidden px-12 py-8 flex flex-col bg-canvas">
       {/* ════════════════════════════════════════════════════
           Header Bar
           ════════════════════════════════════════════════════ */}
-      <header className="border-b border-paper-border bg-card-linen/80 backdrop-blur-sm flex-shrink-0 mb-8 rounded-xl shadow-sm">
-        <div className="w-full px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-paper-border flex-shrink-0 mb-8 pb-4">
+        <div className="w-full flex items-center justify-between">
           <h1 className="font-lora text-lg font-medium tracking-tight text-ink">
             Life Saver
           </h1>
@@ -187,8 +187,8 @@ export default function Dashboard({ onLock }: DashboardProps) {
       {/* ════════════════════════════════════════════════════
           Main Content — Split Grid
           ════════════════════════════════════════════════════ */}
-      <main className="flex-1 w-full flex flex-col overflow-hidden">
-        <div className="flex flex-col lg:flex-row gap-12 flex-1 overflow-hidden">
+      <main className="flex-1 w-full flex flex-col lg:overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-12 flex-1 lg:overflow-hidden">
 
           {/* ── THE CHRONICLE (Left Column) ────────────── */}
           <aside
@@ -196,7 +196,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               w-full lg:w-[28%]
               border-b lg:border-b-0 lg:border-r border-paper-border
               bg-card-linen/40
-              flex flex-col h-full overflow-hidden
+              flex flex-col lg:h-full lg:overflow-hidden
             "
           >
             {/* Header + Clock (Fixed) */}
@@ -227,13 +227,13 @@ export default function Dashboard({ onLock }: DashboardProps) {
             </div>
 
             {/* Timeline Spine (Scrollable) */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-5">
+            <div className="flex-1 lg:overflow-y-auto overflow-x-hidden px-5 pb-5">
               <TimelineSpine entries={timeline} />
             </div>
           </aside>
 
           {/* ── THE FOCUS STAGE (Right Column) ─────────── */}
-          <section className="w-full lg:w-[72%] flex flex-col h-full overflow-hidden">
+          <section className="w-full lg:w-[72%] flex flex-col lg:h-full lg:overflow-hidden">
             {/* Active Focus Card (Fixed) */}
             <div className="flex-shrink-0">
               <ActiveFocusCard
@@ -245,7 +245,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
             </div>
 
             {/* Task Deck (Scrollable) */}
-            <div className="flex-1 overflow-y-auto mt-8 pr-2">
+            <div className="flex-1 lg:overflow-y-auto mt-8 pr-2">
               <TaskDeck tasks={tasks} />
             </div>
           </section>
