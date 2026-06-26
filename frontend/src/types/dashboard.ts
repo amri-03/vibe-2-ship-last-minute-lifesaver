@@ -40,6 +40,7 @@ export interface DialSegment {
   startHour: number   // 0–24 (fractional for minutes)
   endHour: number
   kind: EventKind
+  title?: string
 }
 
 export type InterventionType = 'draft_proposal' | 'scheduling_proposal' | 'procrastination_nudge'
@@ -172,13 +173,13 @@ export const MOCK_TIMELINE: TimelineEntry[] = [
 ]
 
 export const MOCK_DIAL_SEGMENTS: DialSegment[] = [
-  { startHour: 8.5,  endHour: 9,    kind: 'focus' },
-  { startHour: 9,    endHour: 9.25, kind: 'calendar' },
-  { startHour: 9.5,  endHour: 11,   kind: 'focus' },
-  { startHour: 11.5, endHour: 11.75, kind: 'break' },
-  { startHour: 12,   endHour: 13,   kind: 'break' },
-  { startHour: 13,   endHour: 13.75, kind: 'focus' },
-  { startHour: 14,   endHour: 14.5, kind: 'calendar' },
+  { startHour: 8.5,  endHour: 9,    kind: 'focus', title: 'Morning planning' },
+  { startHour: 9,    endHour: 9.25, kind: 'calendar', title: 'Daily standup' },
+  { startHour: 9.5,  endHour: 11,   kind: 'focus', title: 'Deep work — pitch deck' },
+  { startHour: 11.5, endHour: 11.75, kind: 'break', title: 'Break' },
+  { startHour: 12,   endHour: 13,   kind: 'break', title: 'Lunch' },
+  { startHour: 13,   endHour: 13.75, kind: 'focus', title: 'Code review session' },
+  { startHour: 14,   endHour: 14.5, kind: 'calendar', title: 'Client sync call' },
 ]
 
 export const MOCK_FOCUS_SESSION: FocusSession = {
