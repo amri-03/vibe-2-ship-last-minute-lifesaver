@@ -14,7 +14,7 @@
 Traditional calendar and task management tools are passive repositories of obligations—they announce deadlines but offer no assistance in meeting them. The **Last-Minute Life Saver** is a proactive, agentic AI productivity companion designed to bridge the gap between planning and execution. By analyzing a user's calendar, predicting actual effort requirements using the Gemini API, auto-scheduling dedicated focus blocks, and pre-emptively drafting work deliverables (such as outlines, reports, or emails), the system shifts the human user from a state of procrastination to active, friction-free momentum.
 
 ### 1.2 Timeline Constraints & Feasibility
-The project must be designed, implemented, tested, and deployed within a strict **7-day hackathon timeline** (June 22 – June 29). To ensure a successful submission by **June 29, 2:00 PM**, we adopt a single-user system architecture with simulated elements where appropriate, leveraging local file-based persistence rather than a heavy distributed database.
+The project must be designed, implemented, tested, and deployed within a strict **7-day hackathon timeline** (June 22 – June 29). To ensure a successful submission by **June 29, 2:00 PM**, we adopt a multi-user system architecture with robust database persistence (via Supabase), ensuring secure data isolation and persistent state across server recycles.
 
 ### 1.3 Key Google Tech Integrations
 - **Gemini API (via Google AI Studio SDK)**: Serves as the cognitive engine for task planning, scheduling recommendations, function calling, and proactive content drafting.
@@ -55,6 +55,12 @@ The Solo Multi-Tasker is an individual who operates with high autonomy but suffe
 3. **Passive Alert Fatigue**:
    - *Pain Point*: Alarm goes off, user clicks "snooze", and forgets about the task.
    - *AI Solution*: Alerts are context-aware, actionable, and come pre-packaged with the assets needed to start the task immediately.
+
+### 2.3 Multi-User Account & Data Isolation Use Case
+Each "Solo Multi-Tasker" registers for a dedicated account. Upon logging in, the system provides a completely private and isolated environment:
+- **Private Data Partitioning**: All tasks, habits, and focus schedule recommendations are strictly partitioned by User ID at the database level. Users can only see, edit, or delete their own records.
+- **Secure Dashboard Context**: The active dashboard session is tied to the authenticated user. No cross-user data leakage or visualization is possible, ensuring that private study schedules, academic projects, or professional clients are protected.
+- **Encrypted Token Management**: Google Calendar OAuth tokens and personal configuration settings are isolated, stored, and managed securely per user session.
 
 ---
 
@@ -105,7 +111,7 @@ Google Calendar serves as the scheduling backbone of the application. The system
 
 ### 4.1 OAuth 2.0 Authorization Flow
 
-To protect the 7-day hackathon timeline, the application utilizes a simplified, secure **Single-User OAuth Flow**. The developer/judge registers their own Google Cloud Console credentials, allowing the application to authenticate a single user session to sync their calendar.
+The application utilizes a multi-user OAuth 2.0 flow. Each registered user can connect their own Google Calendar account by initiating the authorization code grant flow. The system redirects the user to Google's consent screen, obtains an auth code, exchanges it for access and refresh tokens, and securely associates these tokens with the user's account in the database.
 
 ```
 +-------------+      Redirect (Auth Code request)     +----------------------+
@@ -143,7 +149,7 @@ To protect the 7-day hackathon timeline, the application utilizes a simplified, 
      - `access_token` (expires in 3600 seconds)
      - `refresh_token` (long-lived, offline access)
      - `expires_in` (expiration timestamp)
-   - **Token Storage**: Given the single-user scope, tokens are stored securely in a local JSON configuration file inside the `.tmp/` folder (encrypted with a local key in production, or read directly from a safe server environment variable path).
+   - **Token Storage**: Tokens are stored securely in the Supabase PostgreSQL database under the user's record, encrypted with a backend-stored master key (AES-256-GCM) to prevent unauthorized decryption in case of database leaks.
    - **Auto-Refresh Lifecycle**:
      - Before making any API request to Google Calendar, the backend validates the `expires_in` timestamp.
      - If the token is within 5 minutes of expiration, the backend initiates a POST request to Google's token endpoint:
@@ -157,7 +163,23 @@ To protect the 7-day hackathon timeline, the application utilizes a simplified, 
        grant_type=refresh_token
        ```
      - The database/config is updated with the new `access_token` and updated expiration timestamp.
-     - If refresh token rotation fails (e.g., user revoked permissions), the server wipes the local credentials, redirects the user to the auth screen, and sets the dashboard to an "Unauthenticated" status.
+     - If refresh token rotation fails (e.g., user revoked permissions), the server wipes the user's stored OAuth credentials in the database, sets their calendar status to "Disconnected", and prompts them to re-authenticate inside their active session.
+
+### 4.3 Security & Authentication Isolation Requirements
+
+To protect users' sensitive data (including calendar entries, personal habits, task lists, and generated drafts), we establish strict security and authentication parameters:
+
+1. **Master Password Hashing**:
+   - Master Passwords must never be stored in plain text. We mandate hashing using **bcrypt** with a minimum of 10 salt rounds (or **Argon2id**) at the backend layer.
+2. **Session-Level Token Security**:
+   - Session authentication utilizes **JSON Web Tokens (JWT)** generated upon successful login.
+   - JWTs contain the User ID, user email, and appropriate claims, signed with a high-entropy secret key stored securely in environment variables.
+3. **Local Session Protection**:
+   - Session tokens are transmitted and stored in **HTTP-only, Secure, and SameSite=Strict cookies**.
+   - This mitigates the risk of Cross-Site Scripting (XSS) extracting tokens from `localStorage`, and SameSite protects against Cross-Site Request Forgery (CSRF) attacks.
+4. **Decoupled Key & Integration Onboarding**:
+   - To prevent unauthenticated browser redirect loops, Google Calendar OAuth consent and Gemini API key configurations are decoupled from the registration/onboarding flow.
+   - Upon registration, the user enters a functional dashboard in an "Unlinked" state. They can then connect their Google account or input/verify their Gemini API key (if required) on-demand through their authenticated Settings page. This guarantees that user authentication status is established before third-party redirects or API key validation loops are triggered.
 
 ---
 
@@ -171,8 +193,10 @@ To ensure a functional deployment on Google Cloud Run by the June 29 deadline, w
 > The boundaries below are rigid and designed to prevent scope creep during the 7-day development window.
 
 #### In-Scope (Mandatory Core Deliverables)
-1. **Single-User Architecture**:
-   - The application supports a single active user session (the developer/judge), storing tasks, history, and preferences.
+1. **Multi-User Architecture & Authentication**:
+   - Standard registration and login flows supporting concurrent users.
+   - Secure dashboard isolation based on row-level security (RLS) in Supabase.
+   - Secure custom session management using Master Password hashing (bcrypt) and JWT-based session cookies.
 2. **Glassmorphism Web Dashboard**:
    - A modern responsive web dashboard featuring:
      - **Main Workspace Canvas**: Shows current tasks, deadline severity, and active calendar blocks.
@@ -191,8 +215,8 @@ To ensure a functional deployment on Google Cloud Run by the June 29 deadline, w
    - Standard browser Web Speech API (Speech-to-Text and Text-to-Speech) for hands-free scheduling commands inside the web UI.
 
 #### Out-of-Scope (Strictly Excluded)
-1. **Multi-Tenant User Management & Public Sign-Ups**:
-   - No Firebase Auth, Auth0, or Cognito. The application does not support user registration. It is an administrative/personal console for the authorized Google Account.
+1. **Third-Party Auth Providers (e.g., Auth0, Cognito, Firebase Auth)**:
+   - To keep integration straightforward, we avoid external auth providers. Instead, we implement custom secure database-backed login flows with Master Password hashing (bcrypt) and session JWTs.
 2. **Native iOS / Android Apps**:
    - The application will be a responsive Web Application (desktop-first cockpit) deployed to Cloud Run. No app store packaging.
 3. **Complex Distributed Cloud Databases (Except Supabase)**:
@@ -253,3 +277,4 @@ To ensure a functional deployment on Google Cloud Run by the June 29 deadline, w
 1. **Backend Runtime & Language**: Node.js + Express + TypeScript (unified developer experience, rapid development).
 2. **Database & Persistence (Option B + Seeding)**: Utilizes a free-tier Supabase instance to store task records, scheduling states, and encrypted OAuth tokens, preventing data loss during Cloud Run container recycles.
 3. **Demo Experience**: Implements a "Seed Demo Data" action within the developer console of the UI. When clicked, this runs a backend script to instantly populate the Supabase database with a pre-configured, realistic profile of tasks, deadlines, and habits for a seamless evaluation by the judges.
+4. **Authentication & Session Strategy**: Decoupled custom JWT authentication using Master Password hashing (bcrypt) and secure HTTP-only cookies, with OAuth and API keys configured post-login to avoid redirect loops.
