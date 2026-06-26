@@ -14,10 +14,22 @@
 
 The authentication system supports a multi-user architecture where each user's profile is identified by a unique `UUID` string. The routes below manage user registration, secure login, configuration updates, and session validation.
 
-All protected endpoints require a short-lived local JWT passed via the `Authorization: Bearer <token>` header.
+### 1.1 Cookie-Based Session Management
+To protect users' sensitive data (including calendar entries, personal habits, task lists, and generated drafts) and prevent Cross-Site Scripting (XSS) and Cross-Site Request Forgery (CSRF) attacks, session tokens are **never** stored in browser `localStorage`. 
 
-### 1.1 POST /api/auth/register
-- **Description**: Registers a new user. Hashes the user password using bcrypt, encrypts optional initial credentials (e.g., Gemini API key), and inserts a new profile record.
+- **Session Token**: JSON Web Token (JWT) containing the User ID, user email, and standard claims, signed with a high-entropy secret key.
+- **Transmission Vector**: Transmitted and stored in a secure cookie named `token`.
+- **Cookie Attributes**:
+  - `HttpOnly`: `true` (Mitigates the risk of XSS extracting tokens).
+  - `Secure`: `true` (Enforces HTTPS transmission; local development environments bypass this only on localhost).
+  - `SameSite`: `Strict` (Mitigates CSRF attacks by ensuring the cookie is not sent with cross-site requests).
+  - `Path`: `/` (Available to all app routes).
+  - `Max-Age`: `86400` (Enforces a strict **24-hour** session expiration duration).
+
+---
+
+### 1.2 POST /api/auth/register
+- **Description**: Registers a new user. Hashes the user password using **bcrypt** with exactly **12 salt rounds**, encrypts optional initial credentials (e.g., Gemini API key), and inserts a new profile record.
 - **Access Control**: Public.
 - **Request Headers**:
   - `Content-Type: application/json`
@@ -29,12 +41,13 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
     "geminiApiKey": "AIzaSyYourGeminiApiKeyHere"
   }
   ```
-- **Response (201 Created)**:
+- **Response Headers**:
+  - `Set-Cookie: token=eyJhbGciOi...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+- **Response Body (201 Created)**:
   ```json
   {
     "success": true,
     "message": "User registered successfully.",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGU5YWMwLWZmZDEtNDRiMS1hMjBiLWJjMDRkMTMwZmNiNyIsImV4cCI6MTc4NDc2ODkwMH0...",
     "profile": {
       "id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
       "email": "user@example.com",
@@ -60,8 +73,8 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
     }
     ```
 
-### 1.2 POST /api/auth/login
-- **Description**: Verifies the email and password against the bcrypt hash in the database and generates a short-lived session token (JWT).
+### 1.3 POST /api/auth/login
+- **Description**: Verifies the email and password against the bcrypt hash in the database, generates a signed JWT session token, and sets it in an HTTP-only cookie.
 - **Access Control**: Public.
 - **Request Headers**:
   - `Content-Type: application/json`
@@ -72,12 +85,14 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
     "password": "secure_password_123"
   }
   ```
-- **Response (200 OK)**:
+- **Response Headers**:
+  - `Set-Cookie: token=eyJhbGciOi...; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+- **Response Body (200 OK)**:
   ```json
   {
     "success": true,
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGU5YWMwLWZmZDEtNDRiMS1hMjBiLWJjMDRkMTMwZmNiNyIsImV4cCI6MTc4NDc2ODkwMH0...",
-    "expiresInSeconds": 7200
+    "message": "Login successful.",
+    "expiresInSeconds": 86400
   }
   ```
 - **Error Boundaries**:
@@ -89,9 +104,9 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
     }
     ```
 
-### 1.3 GET /api/auth/status
-- **Description**: Returns the active session status and configuration states. Used by the frontend on mount to verify session validity and determine active connections.
-- **Access Control**: Public (Accepts optional `Authorization` header to check session status).
+### 1.4 GET /api/auth/status
+- **Description**: Returns the active session status and configuration states by validating the JWT inside the HTTP-only `token` cookie. Used by the frontend on mount to verify session validity and determine active connections.
+- **Access Control**: Public (Reads browser cookie automatically).
 - **Response (200 OK - Authenticated)**:
   ```json
   {
@@ -105,7 +120,7 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
     }
   }
   ```
-- **Response (200 OK - Unauthenticated)**:
+- **Response (200 OK - Unauthenticated / Expired)**:
   ```json
   {
     "isAuthenticated": false,
@@ -115,11 +130,10 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
   }
   ```
 
-### 1.4 PATCH /api/auth/config
-- **Description**: Updates the authenticated user's configuration, such as the Gemini API key. The API key is encrypted using AES-256-GCM before writing to the database.
-- **Access Control**: Private (Requires valid JWT).
+### 1.5 PATCH /api/auth/config
+- **Description**: Updates the authenticated user's configuration, such as their personal Gemini API key. The API key is encrypted using AES-256-GCM before writing to the database. This allows decoupled configuration onboarding after login.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Headers**:
-  - `Authorization: Bearer <token>`
   - `Content-Type: application/json`
 - **Request Body**:
   ```json
@@ -135,11 +149,11 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
   }
   ```
 - **Error Boundaries**:
-  - **401 Unauthorized (Invalid Token)**:
+  - **401 Unauthorized (Invalid or Expired Token)**:
     ```json
     {
       "error": "UNAUTHORIZED",
-      "message": "Authentication token is missing or invalid."
+      "message": "Authentication session is invalid or has expired. Please log in again."
     }
     ```
   - **400 Bad Request (Validation Error)**:
@@ -178,7 +192,7 @@ To schedule events, the backend integrates directly with the Google Calendar API
 
 ### 2.1 GET /api/auth/google
 - **Description**: Builds the authorization URL and redirects the user browser to the Google OAuth 2.0 Consent Screen.
-- **Access Control**: Private (Requires valid JWT).
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Google OAuth Parameters Used**:
   - `client_id`: Read from environment variables.
   - `redirect_uri`: Configured callback endpoint.
@@ -273,7 +287,7 @@ CRUD operations to manage the core list of user tasks.
 
 #### GET /api/tasks
 - **Description**: Returns all tasks scoped to the authenticated user. Supports filtering and sorting.
-- **Access Control**: Private (Requires valid JWT).
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Query Parameters**:
   - `status`: Filter by status (`backlog`, `in_progress`, `completed`, `archived`).
   - `sortBy`: Sort by field (`due_at`, `priority_severity`, `created_at`).
@@ -298,7 +312,7 @@ CRUD operations to manage the core list of user tasks.
 
 #### POST /api/tasks
 - **Description**: Creates a new task scoped to the authenticated user.
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Body**:
   ```json
   {
@@ -343,7 +357,7 @@ CRUD operations to manage the core list of user tasks.
 
 #### PATCH /api/tasks/:id
 - **Description**: Partially updates a task. If the status is transitioned to `completed`, `completed_at` is set to `NOW()`. If reverted from `completed`, `completed_at` is set to `NULL`.
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Body**:
   ```json
   {
@@ -375,7 +389,7 @@ Manages the hourly scheduling block timeline. Write operations automatically pus
 
 #### GET /api/focus-blocks
 - **Description**: Returns all focus blocks within a specific time window scoped to the authenticated user.
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Query Parameters**:
   - `start_time`: Filter from date-time (ISO 8601). Required.
   - `end_time`: Filter to date-time (ISO 8601). Required.
@@ -400,7 +414,7 @@ Manages the hourly scheduling block timeline. Write operations automatically pus
 
 #### POST /api/focus-blocks
 - **Description**: Creates a focus block. Instantly executes a call to create a matching event in Google Calendar, stores the returned Google Event ID, and saves the block.
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Body**:
   ```json
   {
@@ -435,7 +449,7 @@ Manages the hourly scheduling block timeline. Write operations automatically pus
 
 #### PATCH /api/focus-blocks/:id
 - **Description**: Updates focus block times, status, or title. Propagates changes to Google Calendar immediately.
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Body**:
   ```json
   {
@@ -464,7 +478,7 @@ The synchronization loop keeps the local database and Google Calendar in sync. I
 
 #### POST /api/focus-blocks/sync
 - **Description**: Triggers the two-way calendar synchronization.
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Response (200 OK)**:
   ```json
   {
@@ -530,7 +544,7 @@ The cognitive core of the system is the proactive pipeline. It automatically run
 
 ### 4.1 POST /api/interventions/generate
 - **Description**: Triggers a background audit of tasks and schedules, sends the context to Gemini, and generates proactive intervention cards using structured JSON output.
-- **Access Control**: Private (also triggered by cron scheduler).
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Body**:
   ```json
   {
@@ -628,7 +642,7 @@ Updates the state of an intervention card in the proactive feed. Fulfilling or a
 
 #### PATCH /api/interventions/:id/status
 - **Description**: Updates the status of an intervention (Accept, Snooze, Dismiss).
-- **Access Control**: Private.
+- **Access Control**: Private (Requires valid session cookie `token`).
 - **Request Body (Accepting)**:
   ```json
   {
