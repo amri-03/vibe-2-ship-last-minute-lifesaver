@@ -170,10 +170,11 @@ The application utilizes a multi-user OAuth 2.0 flow. Each registered user can c
 To protect users' sensitive data (including calendar entries, personal habits, task lists, and generated drafts), we establish strict security and authentication parameters:
 
 1. **Master Password Hashing**:
-   - Master Passwords must never be stored in plain text. We mandate hashing using **bcrypt** with a minimum of 10 salt rounds (or **Argon2id**) at the backend layer.
+   - Master Passwords must never be stored in plain text. We mandate hashing using **bcrypt** with exactly **12 salt rounds** (or **Argon2id** with equivalent security parameters) at the backend layer.
 2. **Session-Level Token Security**:
    - Session authentication utilizes **JSON Web Tokens (JWT)** generated upon successful login.
    - JWTs contain the User ID, user email, and appropriate claims, signed with a high-entropy secret key stored securely in environment variables.
+   - JWT session tokens have a strict expiration duration of **24 hours**, after which the session expires and requires re-authentication.
 3. **Local Session Protection**:
    - Session tokens are transmitted and stored in **HTTP-only, Secure, and SameSite=Strict cookies**.
    - This mitigates the risk of Cross-Site Scripting (XSS) extracting tokens from `localStorage`, and SameSite protects against Cross-Site Request Forgery (CSRF) attacks.
@@ -204,8 +205,9 @@ To ensure a functional deployment on Google Cloud Run by the June 29 deadline, w
      - **Agent Interaction Drawer**: Chat drawer for manual commands, drafting queries, and planning requests.
 3. **Google Calendar Integration**:
    - Real integration via REST API to pull user schedules and push focus blocks.
-4. **Supabase (PostgreSQL) Persistence**:
+4. **Supabase (PostgreSQL) Persistence & Integrity**:
    - Tasks, habits, scheduling states, and encrypted OAuth tokens are stored in a free-tier Supabase PostgreSQL database to ensure state persistence across ephemeral Cloud Run container recycles.
+   - The database schema enforces strict foreign key constraints with cascading deletes (`ON DELETE CASCADE`) to cleanly purge all associated user records when an account is deleted and prevent data drift.
 5. **Seeded Demo Experience**:
    - A "Seed Demo Data" action within the developer console of the UI that runs a backend script to instantly populate Supabase with a realistic, rich profile of tasks, deadlines, and habits for easy evaluation by judges.
 6. **Gemini API Pipeline**:
@@ -253,7 +255,7 @@ To ensure a functional deployment on Google Cloud Run by the June 29 deadline, w
 ```
 
 - **Frontend**: React (Vite) + Tailwind CSS + Lucide React icons.
-  - Premium design using Outfit/Inter typography, harmonious gradients, and glassmorphism.
+  - Premium design using clean, spacious typography (Lora and Plus Jakarta Sans), harmonious gradients, and glassmorphism.
 - **Backend**: Node.js + Express + TypeScript running in a single container.
 - **AI Core**: Gemini 1.5 Pro / Flash via Google AI Studio API SDK.
 - **Database**: Supabase (managed PostgreSQL cloud database).
