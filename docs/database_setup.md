@@ -60,32 +60,46 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // Must be 32 bytes (256 bits
 const IV_LENGTH = 12; // For GCM
 
 export function encrypt(text: string): string {
-  if (!text) return text;
-  const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
-  
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  
-  const authTag = cipher.getAuthTag().toString('hex');
-  
-  // Format stored in DB: iv:ciphertext:authTag
-  return `${iv.toString('hex')}:${encrypted}:${authTag}`;
+  try {
+    if (!text) return text;
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+    
+    let encrypted = cipher.update(text, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const authTag = cipher.getAuthTag().toString('hex');
+    
+    // Format stored in DB: iv:ciphertext:authTag
+    return `${iv.toString('hex')}:${encrypted}:${authTag}`;
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    throw new Error('Failed to encrypt credentials.');
+  }
 }
 
 export function decrypt(encryptedText: string): string {
-  if (!encryptedText) return encryptedText;
-  const [ivHex, encrypted, authTagHex] = encryptedText.split(':');
-  
-  const iv = Buffer.from(ivHex, 'hex');
-  const authTag = Buffer.from(authTagHex, 'hex');
-  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
-  decipher.setAuthTag(authTag);
-  
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  
-  return decrypted;
+  try {
+    if (!encryptedText) return encryptedText;
+    const parts = encryptedText.split(':');
+    if (parts.length !== 3) {
+      throw new Error('Invalid encrypted text format');
+    }
+    const [ivHex, encrypted, authTagHex] = parts;
+    
+    const iv = Buffer.from(ivHex, 'hex');
+    const authTag = Buffer.from(authTagHex, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+    decipher.setAuthTag(authTag);
+    
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    throw new Error('Failed to decrypt credentials. Ensure the encryption key is valid.');
+  }
 }
 ```
 
