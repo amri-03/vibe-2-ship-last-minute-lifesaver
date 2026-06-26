@@ -1,9 +1,9 @@
 # API Endpoint & Integration Specifications
 
-**Phase 3: Integration & Backend Systems — Step B**
+**Phase 3: Integration & Backend Systems — Step B (Refactored for Multi-User)**
 - **Document Status**: Proposal (Ready for Review)
-- **Date**: June 24, 2026
-- **Author**: Technical Architect Agent
+- **Date**: June 26, 2026
+- **Author**: API Architect Agent (Agent 6)
 - **Target Location**: [api_specification.md](file:///c:/Developer_Workspace/active_projects/AI-Projects/Vibe_2_Ship/docs/api_specification.md)
 - **Database Schema Reference**: [schema.sql](file:///c:/Developer_Workspace/active_projects/AI-Projects/Vibe_2_Ship/backend/schema.sql)
 - **Database Guide Reference**: [database_setup.md](file:///c:/Developer_Workspace/active_projects/AI-Projects/Vibe_2_Ship/docs/database_setup.md)
@@ -12,19 +12,20 @@
 
 ## 1. Authentication Routing System
 
-The database enforces a single-user architecture using a table-level check constraint `sole_user_record (id = 1)`. The routes below manage first-time initialization, secure login, and session validation.
+The authentication system supports a multi-user architecture where each user's profile is identified by a unique `UUID` string. The routes below manage user registration, secure login, configuration updates, and session validation.
 
 All protected endpoints require a short-lived local JWT passed via the `Authorization: Bearer <token>` header.
 
-### 1.1 POST /api/auth/setup
-- **Description**: First-time initialization of the system. Hashes the master password, encrypts optional initial credentials (e.g., Gemini API key), and inserts the sole profile record.
-- **Access Control**: Public (but fails if a profile already exists).
+### 1.1 POST /api/auth/register
+- **Description**: Registers a new user. Hashes the user password using bcrypt, encrypts optional initial credentials (e.g., Gemini API key), and inserts a new profile record.
+- **Access Control**: Public.
 - **Request Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
   ```json
   {
-    "masterPassword": "secure_master_password_123",
+    "email": "user@example.com",
+    "password": "secure_password_123",
     "geminiApiKey": "AIzaSyYourGeminiApiKeyHere"
   }
   ```
@@ -32,22 +33,23 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
   ```json
   {
     "success": true,
-    "message": "First-time setup completed successfully.",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzg0NzY4OTAwfQ...",
+    "message": "User registered successfully.",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGU5YWMwLWZmZDEtNDRiMS1hMjBiLWJjMDRkMTMwZmNiNyIsImV4cCI6MTc4NDc2ODkwMH0...",
     "profile": {
-      "id": 1,
+      "id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
+      "email": "user@example.com",
       "googleUserEmail": null,
       "geminiApiKeyConfigured": true,
-      "createdAt": "2026-06-24T16:45:00.000Z"
+      "createdAt": "2026-06-26T15:55:00.000Z"
     }
   }
   ```
 - **Error Boundaries**:
-  - **400 Bad Request (Setup Already Completed)**:
+  - **400 Bad Request (Email Already Exists)**:
     ```json
     {
-      "error": "SETUP_ALREADY_COMPLETED",
-      "message": "Setup has already been run. The database is initialized."
+      "error": "EMAIL_ALREADY_EXISTS",
+      "message": "The email address is already registered."
     }
     ```
   - **400 Bad Request (Validation Failure)**:
@@ -59,73 +61,94 @@ All protected endpoints require a short-lived local JWT passed via the `Authoriz
     ```
 
 ### 1.2 POST /api/auth/login
-- **Description**: Verifies the master password against the bcrypt hash in the database and generates a short-lived session token.
+- **Description**: Verifies the email and password against the bcrypt hash in the database and generates a short-lived session token (JWT).
 - **Access Control**: Public.
 - **Request Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
   ```json
   {
-    "masterPassword": "secure_master_password_123"
+    "email": "user@example.com",
+    "password": "secure_password_123"
   }
   ```
 - **Response (200 OK)**:
   ```json
   {
     "success": true,
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzg0NzY4OTAwfQ...",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OGU5YWMwLWZmZDEtNDRiMS1hMjBiLWJjMDRkMTMwZmNiNyIsImV4cCI6MTc4NDc2ODkwMH0...",
     "expiresInSeconds": 7200
   }
   ```
 - **Error Boundaries**:
-  - **401 Unauthorized (Incorrect Password)**:
+  - **401 Unauthorized (Incorrect Credentials)**:
     ```json
     {
       "error": "INVALID_CREDENTIALS",
-      "message": "The master password provided is incorrect."
-    }
-    ```
-  - **400 Bad Request (Setup Required)**:
-    ```json
-    {
-      "error": "SETUP_REQUIRED",
-      "message": "The database has not been initialized. Run setup first."
+      "message": "Invalid email or password."
     }
     ```
 
 ### 1.3 GET /api/auth/status
-- **Description**: Returns the system onboarding state and the active session status. Used by the frontend on mount to determine whether to show the Setup Screen, Login Screen, or the Dashboard.
+- **Description**: Returns the active session status and configuration states. Used by the frontend on mount to verify session validity and determine active connections.
 - **Access Control**: Public (Accepts optional `Authorization` header to check session status).
-- **Response (200 OK - Authenticated & Setup Complete)**:
+- **Response (200 OK - Authenticated)**:
   ```json
   {
-    "setupCompleted": true,
     "isAuthenticated": true,
     "googleConnected": true,
     "geminiConfigured": true,
-    "googleUserEmail": "user@example.com"
+    "user": {
+      "id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
+      "email": "user@example.com",
+      "googleUserEmail": "user@example.com"
+    }
   }
   ```
 - **Response (200 OK - Unauthenticated)**:
   ```json
   {
-    "setupCompleted": true,
     "isAuthenticated": false,
     "googleConnected": false,
     "geminiConfigured": false,
-    "googleUserEmail": null
+    "user": null
   }
   ```
-- **Response (200 OK - Brand New Project)**:
+
+### 1.4 PATCH /api/auth/config
+- **Description**: Updates the authenticated user's configuration, such as the Gemini API key. The API key is encrypted using AES-256-GCM before writing to the database.
+- **Access Control**: Private (Requires valid JWT).
+- **Request Headers**:
+  - `Authorization: Bearer <token>`
+  - `Content-Type: application/json`
+- **Request Body**:
   ```json
   {
-    "setupCompleted": false,
-    "isAuthenticated": false,
-    "googleConnected": false,
-    "geminiConfigured": false,
-    "googleUserEmail": null
+    "geminiApiKey": "AIzaSyNewGeminiApiKeyHere"
   }
   ```
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "message": "Gemini API key updated successfully."
+  }
+  ```
+- **Error Boundaries**:
+  - **401 Unauthorized (Invalid Token)**:
+    ```json
+    {
+      "error": "UNAUTHORIZED",
+      "message": "Authentication token is missing or invalid."
+    }
+    ```
+  - **400 Bad Request (Validation Error)**:
+    ```json
+    {
+      "error": "VALIDATION_FAILED",
+      "message": "Gemini API key must be a valid non-empty string."
+    }
+    ```
 
 ---
 
@@ -150,7 +173,7 @@ To schedule events, the backend integrates directly with the Google Calendar API
                                     |
                                     +---> Exchanges Code for Tokens
                                     +---> Encrypts Tokens via AES-256-GCM
-                                    +---> Upserts to Profile (ID = 1)
+                                    +---> Upserts to Profile (UUID)
 ```
 
 ### 2.1 GET /api/auth/google
@@ -178,7 +201,7 @@ To schedule events, the backend integrates directly with the Google Calendar API
   3. Decodes the ID token or queries Google userinfo to verify the user's primary email address.
   4. Encrypts the returned `access_token` and `refresh_token` using **AES-256-GCM** (see helper in `database_setup.md`).
   5. Calculates `google_oauth_expires_at` (Current Time + `expires_in` seconds).
-  6. Updates the row where `id = 1` in `profiles`.
+  6. Updates the row for the authenticated user in `profiles` matching their UUID.
 - **Response**: `302 Found` (Redirects user to the frontend dashboard, e.g., `/?auth=google_success` or `/settings?auth=error`).
 
 ### 2.3 Pre-Request Token Refresher Mechanism
@@ -186,9 +209,12 @@ To schedule events, the backend integrates directly with the Google Calendar API
 Before making any Google Calendar API call, the backend must verify token validity. This is managed by a middleware or utility wrapper:
 
 ```typescript
-async function getAuthenticatedOAuth2Client(): Promise<google.auth.OAuth2> {
+async function getAuthenticatedOAuth2Client(userId: string): Promise<google.auth.OAuth2> {
   // 1. Fetch encrypted tokens and expiration from database
-  const profile = await db.query("SELECT google_oauth_access_token, google_oauth_refresh_token, google_oauth_expires_at FROM profiles WHERE id = 1");
+  const profile = await db.query(
+    "SELECT google_oauth_access_token, google_oauth_refresh_token, google_oauth_expires_at FROM profiles WHERE id = $1",
+    [userId]
+  );
   if (!profile.google_oauth_refresh_token) {
     throw new GoogleAuthRequiredError("Google Calendar is not connected.");
   }
@@ -213,15 +239,16 @@ async function getAuthenticatedOAuth2Client(): Promise<google.auth.OAuth2> {
       // 5. Encrypt new access token and update the database
       const encryptedAccessToken = encrypt(newAccessToken);
       await db.query(
-        "UPDATE profiles SET google_oauth_access_token = $1, google_oauth_expires_at = $2 WHERE id = 1",
-        [encryptedAccessToken, newExpiresAt]
+        "UPDATE profiles SET google_oauth_access_token = $1, google_oauth_expires_at = $2 WHERE id = $3",
+        [encryptedAccessToken, newExpiresAt, userId]
       );
       
       oauth2Client.setCredentials({ access_token: newAccessToken, refresh_token: refreshToken });
     } catch (error) {
       // 6. Handle revocation / invalid credentials
       await db.query(
-        "UPDATE profiles SET google_oauth_access_token = NULL, google_oauth_refresh_token = NULL, google_oauth_expires_at = NULL, google_user_email = NULL WHERE id = 1"
+        "UPDATE profiles SET google_oauth_access_token = NULL, google_oauth_refresh_token = NULL, google_oauth_expires_at = NULL, google_user_email = NULL WHERE id = $1",
+        [userId]
       );
       throw new GoogleAuthExpiredError("Google session expired. Please reconnect.");
     }
@@ -238,14 +265,14 @@ async function getAuthenticatedOAuth2Client(): Promise<google.auth.OAuth2> {
 
 ## 3. Cockpit Data & Sync Pipelines
 
-The Cockpit is the dashboard for managing tasks and focus blocks. Changes made to focus blocks are written through to the database and synchronized with Google Calendar.
+The Cockpit is the dashboard for managing tasks and focus blocks. All tasks and focus blocks are scoped to the authenticated user's profile `UUID` string.
 
 ### 3.1 Tasks API (`/api/tasks`)
 
 CRUD operations to manage the core list of user tasks.
 
 #### GET /api/tasks
-- **Description**: Returns all tasks. Supports filtering and sorting.
+- **Description**: Returns all tasks scoped to the authenticated user. Supports filtering and sorting.
 - **Access Control**: Private (Requires valid JWT).
 - **Query Parameters**:
   - `status`: Filter by status (`backlog`, `in_progress`, `completed`, `archived`).
@@ -255,6 +282,7 @@ CRUD operations to manage the core list of user tasks.
   [
     {
       "id": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+      "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
       "title": "Finalize Submission Checklist",
       "description": "Cross-reference files for the final submission.",
       "estimated_duration_minutes": 45,
@@ -269,7 +297,7 @@ CRUD operations to manage the core list of user tasks.
   ```
 
 #### POST /api/tasks
-- **Description**: Creates a new task.
+- **Description**: Creates a new task scoped to the authenticated user.
 - **Access Control**: Private.
 - **Request Body**:
   ```json
@@ -289,6 +317,7 @@ CRUD operations to manage the core list of user tasks.
   ```json
   {
     "id": "e4f8d9c0-9a3d-4c3e-8b1f-7a2e3d4c5b6a",
+    "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
     "title": "Draft Presentation Slides",
     "description": "Prepare outline and template.",
     "estimated_duration_minutes": 90,
@@ -325,6 +354,7 @@ CRUD operations to manage the core list of user tasks.
   ```json
   {
     "id": "e4f8d9c0-9a3d-4c3e-8b1f-7a2e3d4c5b6a",
+    "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
     "title": "Draft Presentation Slides",
     "description": "Prepare outline and template.",
     "estimated_duration_minutes": 90,
@@ -344,7 +374,7 @@ CRUD operations to manage the core list of user tasks.
 Manages the hourly scheduling block timeline. Write operations automatically push updates to Google Calendar in a write-through pattern.
 
 #### GET /api/focus-blocks
-- **Description**: Returns all focus blocks within a specific time window.
+- **Description**: Returns all focus blocks within a specific time window scoped to the authenticated user.
 - **Access Control**: Private.
 - **Query Parameters**:
   - `start_time`: Filter from date-time (ISO 8601). Required.
@@ -354,6 +384,7 @@ Manages the hourly scheduling block timeline. Write operations automatically pus
   [
     {
       "id": "f5e9d8c7-2b3a-4d5e-9f8a-7b6c5d4e3f2a",
+      "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
       "task_id": "e4f8d9c0-9a3d-4c3e-8b1f-7a2e3d4c5b6a",
       "google_event_id": "google_event_uuid_123",
       "title": "Focus Block: Draft Presentation Slides",
@@ -391,6 +422,7 @@ Manages the hourly scheduling block timeline. Write operations automatically pus
   ```json
   {
     "id": "f5e9d8c7-2b3a-4d5e-9f8a-7b6c5d4e3f2a",
+    "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
     "task_id": "e4f8d9c0-9a3d-4c3e-8b1f-7a2e3d4c5b6a",
     "google_event_id": "gcal_event_id_abc123",
     "title": "Focus Block: Draft Presentation Slides",
@@ -416,6 +448,7 @@ Manages the hourly scheduling block timeline. Write operations automatically pus
   ```json
   {
     "id": "f5e9d8c7-2b3a-4d5e-9f8a-7b6c5d4e3f2a",
+    "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
     "google_event_id": "gcal_event_id_abc123",
     "start_time": "2026-06-25T10:00:00.000Z",
     "end_time": "2026-06-25T11:30:00.000Z",
@@ -479,11 +512,13 @@ Start / End           'cancelled'
 4. **State Transition Audits**:
    - The sync loop executes a query to transition expired focus blocks to `missed`:
      ```sql
+     -- Example user-scoped state update
      UPDATE focus_blocks
      SET status = 'missed'
      WHERE end_time < NOW() 
        AND status IN ('scheduled', 'active')
-       AND (task_id IS NULL OR task_id IN (SELECT id FROM tasks WHERE status != 'completed'));
+       AND profile_id = $1
+       AND (task_id IS NULL OR task_id IN (SELECT id FROM tasks WHERE status != 'completed' AND profile_id = $1));
      ```
    - For every block marked `missed`, the backend publishes a background job to request rescheduling from the Gemini AI Pipeline.
 
@@ -505,7 +540,7 @@ The cognitive core of the system is the proactive pipeline. It automatically run
 
 #### Pipeline Execution Steps:
 1. **Fetch Context**:
-   - Retrieve the profile (`id = 1`) and decrypt `gemini_api_key`.
+   - Retrieve the user's profile matching their authenticated UUID and decrypt their `gemini_api_key`.
    - Query all pending/backlog tasks.
    - Query the next 48 hours of calendar allocations (focus blocks and general busy blocks).
    - Identify impending deadlines (due in < 24 hours) and recently missed focus blocks.
@@ -521,6 +556,7 @@ The cognitive core of the system is the proactive pipeline. It automatically run
     "interventionsGenerated": [
       {
         "id": "d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a44",
+        "profile_id": "678e9ac0-ffd1-44b1-a20b-bc04d130fcb7",
         "task_id": "e4f8d9c0-9a3d-4c3e-8b1f-7a2e3d4c5b6a",
         "type": "draft_proposal",
         "status": "pending",
