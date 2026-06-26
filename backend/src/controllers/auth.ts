@@ -45,7 +45,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const passwordHash = await bcrypt.hash(password, 12);
 
     let encryptedGeminiKey = null;
     if (geminiApiKey) {
@@ -70,7 +70,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: newProfile.id }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ id: newProfile.id }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(201).json({
       success: true,
@@ -118,12 +118,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: profile.id }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ id: profile.id }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(200).json({
       success: true,
       token,
-      expiresInSeconds: 7200,
+      expiresInSeconds: 86400,
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -354,7 +354,7 @@ export const seedDemoData = async (req: Request, res: Response): Promise<void> =
       await supabase.from('profiles').delete().eq('id', demoProfileId);
     }
 
-    const passwordHash = await bcrypt.hash(demoPassword, 10);
+    const passwordHash = await bcrypt.hash(demoPassword, 12);
 
     const { data: newProfile, error: profileError } = await supabase
       .from('profiles')
@@ -526,7 +526,7 @@ export const seedDemoData = async (req: Request, res: Response): Promise<void> =
     const { error: interventionsError } = await supabase.from('ai_interventions').insert(interventionsToInsert);
     if (interventionsError) throw interventionsError;
 
-    const token = jwt.sign({ id: demoProfileId }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ id: demoProfileId }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(201).json({
       success: true,
