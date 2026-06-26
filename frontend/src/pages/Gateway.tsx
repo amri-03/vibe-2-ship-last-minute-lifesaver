@@ -14,6 +14,7 @@ import api from '../services/api'
 /* ──────────────────────────────────────────────────────────
    Gateway.tsx — Onboarding & Multi-User Authentication
    Dual-State Layout: Sign In and Registration
+   Zero-Scroll, Strict 0px Corner Radii Overhaul
    ────────────────────────────────────────────────────────── */
 
 // ── Validation helpers ─────────────────────────────────────
@@ -41,7 +42,7 @@ function PasswordInput({
   const [visible, setVisible] = useState(false)
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <div className="relative">
         <input
           id={id}
@@ -51,7 +52,7 @@ function PasswordInput({
           placeholder={placeholder}
           autoComplete="off"
           className={`
-            bg-cardLinen/40 border text-ink font-jakarta text-sm rounded-lg px-4 py-3 pr-12 transition-all duration-300 w-full placeholder:text-charcoal/40
+            bg-cardLinen/40 border text-ink font-jakarta text-sm rounded-none px-4 py-2.5 pr-12 transition-all duration-300 w-full placeholder:text-charcoal/40
             focus:bg-white focus:border-sage focus:ring-1 focus:ring-sage/30 focus:outline-none
             ${error ? 'border-terracotta bg-terracotta/5 text-terracotta focus:border-terracotta focus:ring-terracotta/30 placeholder:text-terracotta/40' : 'border-paperBorder'}
           `}
@@ -77,7 +78,7 @@ function PasswordInput({
 
 function FormLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
   return (
-    <label htmlFor={htmlFor} className="block text-sm font-medium text-ink font-jakarta mb-1.5">
+    <label htmlFor={htmlFor} className="block text-xs font-semibold text-ink font-jakarta mb-1">
       {children}
     </label>
   )
@@ -90,7 +91,6 @@ export default function Gateway() {
     setupCompleted,
     isAuthenticated,
     loading,
-    error,
     checkAuth,
   } = useAuth()
 
@@ -110,31 +110,21 @@ export default function Gateway() {
     setIsRegistering(!setupCompleted)
   }, [setupCompleted])
 
-  // Password Hygiene: wiping password caches on mount and cleanup
+  // Password Hygiene: wipe all local password state fields upon mount and view toggles
   useEffect(() => {
     setMasterPassword('')
     setConfirmPassword('')
+    setPasswordTouched(false)
+    setFormError(null)
+  }, [isRegistering])
+
+  // Secure memory wipe on unmount
+  useEffect(() => {
     return () => {
       setMasterPassword('')
       setConfirmPassword('')
     }
   }, [])
-
-  // Toggle state with password hygiene clearing
-  const handleToggleState = () => {
-    setIsRegistering((prev) => !prev)
-    setMasterPassword('')
-    setConfirmPassword('')
-    setPasswordTouched(false)
-    setFormError(null)
-  }
-
-  // Sync contextual errors to form errors
-  useEffect(() => {
-    if (error) {
-      setFormError(error)
-    }
-  }, [error])
 
   // ── Derived validation ───────────────────────────────────
   const passwordError = passwordTouched ? validatePassword(masterPassword) : null
@@ -262,7 +252,7 @@ export default function Gateway() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen h-screen w-screen overflow-hidden flex flex-col bg-canvas justify-center items-center px-4">
       {/* Subtle background texture */}
       <div
         className="pointer-events-none fixed inset-0 opacity-[0.03]"
@@ -278,35 +268,35 @@ export default function Gateway() {
         className="
           relative z-10 max-w-[480px] w-full
           bg-white/40 border border-white/60
-          p-12 rounded-xl
+          p-6 rounded-none
           shadow-[0_8px_32px_rgba(28,25,23,0.04)]
           backdrop-blur-md
         "
       >
         {/* Brand header */}
-        <div className="text-center space-y-1.5 mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
-            <Sparkles size={22} className="text-sage" />
+        <div className="text-center flex flex-col items-center mb-4">
+          <div className="inline-flex items-center justify-center w-10 h-10 rounded-none bg-sage/10 mb-2">
+            <Sparkles size={20} className="text-sage" />
           </div>
-          <p className="font-jakarta text-sm font-semibold tracking-widest uppercase text-ink">
+          <p className="font-jakarta text-xs font-semibold tracking-widest text-charcoal/80 uppercase">
             LAST-MINUTE
           </p>
-          <h1 className="font-lora text-4xl font-medium tracking-tight text-ink">
+          <h1 className="font-lora text-4xl text-ink font-medium mt-1">
             Life Saver
           </h1>
-          <p className="font-jakarta text-sm text-charcoal truncate whitespace-nowrap">
+          <p className="font-jakarta text-sm text-charcoal mt-2">
             Proactive AI Productivity Companion
           </p>
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-paper-border/60 mb-6" />
+        <div className="h-px bg-paper-border/60 mb-4" />
 
         {isRegistering ? (
           /* ════════════════════════════════════════════════
              Registration State
              ════════════════════════════════════════════════ */
-          <form onSubmit={handleSetup} className="space-y-6">
+          <form onSubmit={handleSetup} className="space-y-4">
             <div>
               <FormLabel htmlFor="email">Email Address</FormLabel>
               <input
@@ -317,7 +307,7 @@ export default function Gateway() {
                 placeholder="name@example.com"
                 required
                 className="
-                  bg-cardLinen/40 border border-paperBorder text-ink font-jakarta text-sm rounded-lg px-4 py-3 transition-all duration-300 w-full placeholder:text-charcoal/40
+                  bg-cardLinen/40 border border-paperBorder text-ink font-jakarta text-sm rounded-none px-4 py-2.5 transition-all duration-300 w-full placeholder:text-charcoal/40
                   focus:bg-white focus:border-sage focus:ring-1 focus:ring-sage/30 focus:outline-none
                 "
               />
@@ -352,7 +342,7 @@ export default function Gateway() {
 
             {/* Form-level error */}
             {formError && (
-              <div className="rounded-lg bg-terracotta/8 border border-terracotta/20 px-4 py-3">
+              <div className="rounded-none bg-terracotta/8 border border-terracotta/20 px-4 py-2">
                 <p className="flex items-center gap-2 text-sm text-terracotta font-jakarta">
                   <AlertCircle size={15} />
                   {formError}
@@ -366,7 +356,7 @@ export default function Gateway() {
               disabled={submitting}
               className="
                 w-full flex items-center justify-center gap-2 group cursor-pointer
-                rounded-lg bg-ink px-4 py-3.5
+                rounded-none bg-ink px-4 py-3
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300 ease-in-out will-change-transform
                 hover:bg-ink hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
@@ -388,7 +378,7 @@ export default function Gateway() {
           /* ════════════════════════════════════════════════
              Sign In State
              ════════════════════════════════════════════════ */
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <FormLabel htmlFor="email">Email Address</FormLabel>
               <input
@@ -399,7 +389,7 @@ export default function Gateway() {
                 placeholder="name@example.com"
                 required
                 className="
-                  bg-cardLinen/40 border border-paperBorder text-ink font-jakarta text-sm rounded-lg px-4 py-3 transition-all duration-300 w-full placeholder:text-charcoal/40
+                  bg-cardLinen/40 border border-paperBorder text-ink font-jakarta text-sm rounded-none px-4 py-2.5 transition-all duration-300 w-full placeholder:text-charcoal/40
                   focus:bg-white focus:border-sage focus:ring-1 focus:ring-sage/30 focus:outline-none
                 "
               />
@@ -421,7 +411,7 @@ export default function Gateway() {
 
             {/* Form-level error */}
             {formError && (
-              <div className="rounded-lg bg-terracotta/8 border border-terracotta/20 px-4 py-3">
+              <div className="rounded-none bg-terracotta/8 border border-terracotta/20 px-4 py-2">
                 <p className="flex items-center gap-2 text-sm text-terracotta font-jakarta">
                   <AlertCircle size={15} />
                   {formError}
@@ -435,7 +425,7 @@ export default function Gateway() {
               disabled={submitting}
               className="
                 w-full flex items-center justify-center gap-2 group cursor-pointer
-                rounded-lg bg-ink px-4 py-3.5
+                rounded-none bg-ink px-4 py-3
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300 ease-in-out will-change-transform
                 hover:bg-ink hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
@@ -456,10 +446,10 @@ export default function Gateway() {
         )}
 
         {/* Toggle Link */}
-        <div className="mt-6 text-center">
+        <div className="mt-4 text-center">
           <button
             type="button"
-            onClick={handleToggleState}
+            onClick={() => setIsRegistering((prev) => !prev)}
             className="text-base text-charcoal font-semibold font-jakarta cursor-pointer hover:text-charcoal transition-colors"
           >
             {isRegistering
@@ -469,7 +459,7 @@ export default function Gateway() {
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-paper-border/50 my-6" />
+        <div className="h-px bg-paper-border/50 my-4" />
 
         {/* Seed Demo Button */}
         <button
@@ -478,7 +468,7 @@ export default function Gateway() {
           disabled={submitting}
           className="
             w-full flex items-center justify-center gap-2 cursor-pointer
-            rounded-lg border border-charcoal/40 bg-charcoal/5 px-4 py-3
+            rounded-none border border-charcoal/40 bg-charcoal/5 px-4 py-2.5
             font-jakarta text-sm font-semibold text-charcoal
             transition-all duration-300
             hover:scale-[1.02] hover:-translate-y-px hover:shadow-sm
@@ -491,7 +481,7 @@ export default function Gateway() {
         </button>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-charcoal font-medium font-jakarta">
+        <p className="mt-4 text-center text-xs text-charcoal font-medium font-jakarta">
           Your data is encrypted and stored locally.
         </p>
       </div>
