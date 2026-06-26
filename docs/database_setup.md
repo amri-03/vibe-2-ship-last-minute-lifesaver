@@ -6,34 +6,41 @@ This document describes how to set up, secure, and verify the multi-user databas
 
 ## 1. Initializing the Schema in Supabase
 
-To apply the schema to your Supabase project:
+To initialize the database tables in Supabase:
 1. Log in to the [Supabase Dashboard](https://supabase.com).
 2. Select your project and navigate to the **SQL Editor** in the left sidebar.
 3. Click **New Query**.
-4. Copy the entire contents of [`backend/schema.sql`](file:///c:/Developer_Workspace/active_projects/AI-Projects/Vibe_2_Ship/backend/schema.sql) and paste them into the editor.
+4. Paste the DDL script from [`backend/schema.sql`](file:///c:/Developer_Workspace/active_projects/AI-Projects/Vibe_2_Ship/backend/schema.sql).
 5. Click **Run** (or press `Cmd + Enter` / `Ctrl + Enter`).
-6. Confirm that the query executes successfully and that four tables (`profiles`, `tasks`, `focus_blocks`, `ai_interventions`) are visible under the `public` schema.
+6. Confirm that the query executes successfully. This registers:
+   * The `"uuid-ossp"` extension to provide standard UUID algorithms.
+   * Four core tables (`profiles`, `tasks`, `focus_blocks`, `ai_interventions`) using UUID primary/foreign keys.
+   * Reusable update triggers to maintain the `updated_at` timestamps.
 
 ---
 
-## 2. Multi-User Database Model
+## 2. Multi-User Database Model & Alignment
 
-The database supports traditional multi-user registration and partitioning:
-* The `profiles` table uses a UUID primary key (`id`), auto-generated using PostgreSQL's `gen_random_uuid()` function.
-* The `email` field is strictly `UNIQUE` and `NOT NULL`, serving as the user identification for login purposes.
-* All relational tables (`tasks`, `focus_blocks`, `ai_interventions`) partition data by referencing the user's profile UUID via the `profile_id` column.
-* A `CASCADE DELETE` constraint is defined on all foreign keys referencing `profiles(id)`. Deleting a user profile will automatically delete all associated data (tasks, focus blocks, and AI interventions) for that user.
+The database partitions workspace data per user:
+* The `profiles` table uses `id UUID PRIMARY KEY DEFAULT gen_random_uuid()`.
+* Relational tables (`tasks`, `focus_blocks`, `ai_interventions`) use a `profile_id UUID NOT NULL` column referencing `profiles(id)`.
+* Foreign-key constraints enforce `ON DELETE CASCADE` on `profile_id` across all child tables to prevent orphaned rows when a user deletes their account.
+* The `ai_interventions.content_payload` column is defined as `JSONB` which natively supports the complex, nested JSON objects (including arrays like `proposedSlots` and strings like `body`/`message`) sent by the Gemini AI pipeline.
 
-### Safe Upsert/Insert Pattern
-When performing database seeding or setting up user profiles:
+### Multi-User User Registration INSERT Template
+When a new user registers via `POST /api/auth/register`, the backend hashes their password and encrypts their optional Gemini API key before executing the database insert:
 
 ```sql
-INSERT INTO profiles (email, password_hash, google_user_email)
-VALUES ('user@example.com', '$2b$12$ExampleHash...', 'user@example.com')
-ON CONFLICT (email) DO UPDATE 
-SET password_hash = EXCLUDED.password_hash,
-    google_user_email = EXCLUDED.google_user_email,
-    updated_at = NOW();
+-- Template for inserting a new user profile upon registration
+INSERT INTO profiles (
+    email, 
+    password_hash, 
+    gemini_api_key
+) VALUES (
+    'newuser@example.com', 
+    '$2b$12$BcryptHashPlaceholderHere...', -- Hashed password
+    '1234567890abcdef:EncryptedGeminiKey:AuthTagPlaceholder' -- Optional encrypted Gemini key
+);
 ```
 
 ---
@@ -86,53 +93,58 @@ export function decrypt(encryptedText: string): string {
 
 ## 4. Verification & Validation Steps
 
-To ensure that the multi-user schema is working correctly:
+Verify the multi-user behavior, unique email constraints, and cascade delete propagation directly in the SQL Editor:
 
 ### Test 1: Verify Unique Email Constraint
-Attempt to insert two profiles with the same email. The second insert **must fail**:
+Inserting a duplicate email address must fail:
 ```sql
 -- 1. Insert first user
 INSERT INTO profiles (email, password_hash) 
-VALUES ('test@example.com', 'hash_1');
+VALUES ('duplicate@example.com', 'hash_1');
 
--- 2. Attempt to insert second user with duplicate email (should fail)
+-- 2. Attempt to insert second user with duplicate email (must fail)
 INSERT INTO profiles (email, password_hash) 
-VALUES ('test@example.com', 'hash_2');
+VALUES ('duplicate@example.com', 'hash_2');
 ```
 
-### Test 2: Verify Cascading Deletion on Profile Delete
-Confirm that deleting a profile cascade-deletes all associated tasks, focus blocks, and interventions:
+### Test 2: Verify Cascading Deletion on User Delete
+Confirm that deleting a profile successfully cascade-deletes all associated tasks, focus blocks, and interventions, leaving no orphaned data:
 ```sql
 -- 1. Create a user
 INSERT INTO profiles (id, email, password_hash) 
-VALUES ('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00', 'delete_test@example.com', 'mock_hash');
+VALUES ('a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'testuser@example.com', 'hash_placeholder');
 
 -- 2. Insert a task linked to this user
 INSERT INTO tasks (id, profile_id, title, estimated_duration_minutes, priority_severity, status)
-VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00', 'Test Task', 60, 'high', 'backlog');
+VALUES ('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d', 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 'Verify DB Integration', 30, 'medium', 'backlog');
 
--- 3. Insert an intervention linked to this user & task
+-- 3. Insert an intervention linked to this user & task (verifies JSONB content payload compatibility)
 INSERT INTO ai_interventions (id, profile_id, task_id, type, content_payload)
-VALUES ('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22', 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'draft_proposal', '{"draft": "draft contents"}');
+VALUES (
+    '8b7c6d5e-4f3a-2b1c-0d9e-8f7a6b5c4d3e', 
+    'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', 
+    '9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d', 
+    'draft_proposal', 
+    '{"title": "Draft Outline", "body": "1. Task Intro", "format": "markdown"}'::jsonb
+);
 
 -- 4. Insert a focus block linked to this user & task
 INSERT INTO focus_blocks (id, profile_id, task_id, title, start_time, end_time)
-VALUES ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33', 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Work Block', NOW(), NOW() + INTERVAL '1 hour');
+VALUES ('7c6d5e4f-3a2b-1c0d-9e8f-7a6b5c4d3e2f', 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d', '9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d', 'Verify Focus Block', NOW(), NOW() + INTERVAL '1 hour');
 
 -- 5. Delete the profile
-DELETE FROM profiles WHERE id = 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00';
+DELETE FROM profiles WHERE id = 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
 
--- 6. Check results:
---   - tasks, ai_interventions, and focus_blocks rows should all be deleted automatically
-SELECT * FROM tasks WHERE profile_id = 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00';          -- Returns 0 rows
-SELECT * FROM ai_interventions WHERE profile_id = 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00';  -- Returns 0 rows
-SELECT * FROM focus_blocks WHERE profile_id = 'd0eebc99-9c0b-4ef8-bb6d-6bb9bd380a00';      -- Returns 0 rows
+-- 6. Check results (each query should return 0 rows):
+SELECT * FROM tasks WHERE profile_id = 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+SELECT * FROM ai_interventions WHERE profile_id = 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
+SELECT * FROM focus_blocks WHERE profile_id = 'a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d';
 ```
 
 ### Test 3: Verify Triggers
-Modify a profile or task and confirm that `updated_at` is automatically updated to the current time:
+Updating a profile or task updates `updated_at` automatically:
 ```sql
-SELECT updated_at FROM profiles WHERE email = 'test@example.com';
-UPDATE profiles SET google_user_email = 'updated_gmail@example.com' WHERE email = 'test@example.com';
-SELECT updated_at FROM profiles WHERE email = 'test@example.com'; -- Should show the updated timestamp
+SELECT updated_at FROM profiles WHERE email = 'duplicate@example.com';
+UPDATE profiles SET google_user_email = 'duplicate@gmail.com' WHERE email = 'duplicate@example.com';
+SELECT updated_at FROM profiles WHERE email = 'duplicate@example.com'; -- Should be updated to the current time
 ```
