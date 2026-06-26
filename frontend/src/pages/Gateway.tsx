@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
+import api from '../services/api'
 
 /* ──────────────────────────────────────────────────────────
    Gateway.tsx — Onboarding & Multi-User Authentication
@@ -50,11 +51,9 @@ function PasswordInput({
           placeholder={placeholder}
           autoComplete="off"
           className={`
-            w-full rounded-lg border bg-white/60 px-4 py-3 pr-12
-            font-jakarta text-sm text-ink placeholder-charcoal/50
-            outline-none transition-all duration-200
-            focus:ring-2 focus:ring-horizon/30 focus:border-horizon
-            ${error ? 'border-terracotta/60' : 'border-paper-border'}
+            bg-cardLinen/40 border text-ink font-jakarta text-sm rounded-lg px-4 py-3 pr-12 transition-all duration-300 w-full placeholder:text-charcoal/40
+            focus:bg-white focus:border-sage focus:ring-1 focus:ring-sage/30 focus:outline-none
+            ${error ? 'border-terracotta bg-terracotta/5 text-terracotta focus:border-terracotta focus:ring-terracotta/30 placeholder:text-terracotta/40' : 'border-paperBorder'}
           `}
         />
         <button
@@ -92,8 +91,6 @@ export default function Gateway() {
     isAuthenticated,
     loading,
     error,
-    login,
-    setup,
     checkAuth,
   } = useAuth()
 
@@ -166,14 +163,20 @@ export default function Gateway() {
       setSubmitting(true)
       setFormError(null)
       try {
-        await setup(masterPassword)
+        const res = await api.post('/auth/register', { email, password: masterPassword })
+        if (res.data.success && res.data.token) {
+          localStorage.setItem('bearer_token', res.data.token)
+          await checkAuth()
+        } else {
+          throw new Error(res.data.message || 'Registration failed.')
+        }
       } catch (err: any) {
-        setFormError(err.message || 'Setup failed. Please try again.')
+        setFormError(err.response?.data?.message || err.message || 'Registration failed. Please try again.')
       } finally {
         setSubmitting(false)
       }
     },
-    [email, masterPassword, confirmPassword, setup],
+    [email, masterPassword, confirmPassword, checkAuth],
   )
 
   const handleLogin = useCallback(
@@ -195,14 +198,20 @@ export default function Gateway() {
       setSubmitting(true)
       setFormError(null)
       try {
-        await login(masterPassword)
+        const res = await api.post('/auth/login', { email, password: masterPassword })
+        if (res.data.success && res.data.token) {
+          localStorage.setItem('bearer_token', res.data.token)
+          await checkAuth()
+        } else {
+          throw new Error(res.data.message || 'Login failed.')
+        }
       } catch (err: any) {
-        setFormError(err.message || 'Login failed. Please try again.')
+        setFormError(err.response?.data?.message || err.message || 'Login failed. Please try again.')
       } finally {
         setSubmitting(false)
       }
     },
-    [email, masterPassword, login],
+    [email, masterPassword, checkAuth],
   )
 
   const handleRunDemo = useCallback(async () => {
@@ -279,13 +288,13 @@ export default function Gateway() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-sage/10 mb-3">
             <Sparkles size={22} className="text-sage" />
           </div>
-          <p className="font-jakarta text-sm font-semibold uppercase text-ink" style={{ letterSpacing: '0.12em' }}>
+          <p className="font-jakarta text-sm font-semibold tracking-widest uppercase text-ink">
             LAST-MINUTE
           </p>
-          <h1 className="font-lora text-4xl font-medium tracking-tight text-ink" style={{ letterSpacing: '0.04em' }}>
+          <h1 className="font-lora text-4xl font-medium tracking-tight text-ink">
             Life Saver
           </h1>
-          <p className="font-jakarta text-md text-charcoal/120 leading-relaxed tracking-[0.10em] truncate whitespace-nowrap">
+          <p className="font-jakarta text-sm text-charcoal truncate whitespace-nowrap">
             Proactive AI Productivity Companion
           </p>
         </div>
@@ -308,10 +317,8 @@ export default function Gateway() {
                 placeholder="name@example.com"
                 required
                 className="
-                  w-full rounded-lg border border-paper-border bg-white/60 px-4 py-3
-                  font-jakarta text-sm text-ink placeholder-charcoal/50
-                  outline-none transition-all duration-200
-                  focus:ring-2 focus:ring-horizon/30 focus:border-horizon
+                  bg-cardLinen/40 border border-paperBorder text-ink font-jakarta text-sm rounded-lg px-4 py-3 transition-all duration-300 w-full placeholder:text-charcoal/40
+                  focus:bg-white focus:border-sage focus:ring-1 focus:ring-sage/30 focus:outline-none
                 "
               />
             </div>
@@ -392,10 +399,8 @@ export default function Gateway() {
                 placeholder="name@example.com"
                 required
                 className="
-                  w-full rounded-lg border border-paper-border bg-white/60 px-4 py-3
-                  font-jakarta text-sm text-ink placeholder-charcoal/50
-                  outline-none transition-all duration-200
-                  focus:ring-2 focus:ring-horizon/30 focus:border-horizon
+                  bg-cardLinen/40 border border-paperBorder text-ink font-jakarta text-sm rounded-lg px-4 py-3 transition-all duration-300 w-full placeholder:text-charcoal/40
+                  focus:bg-white focus:border-sage focus:ring-1 focus:ring-sage/30 focus:outline-none
                 "
               />
             </div>
