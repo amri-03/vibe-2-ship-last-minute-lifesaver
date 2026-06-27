@@ -266,31 +266,26 @@ export default function Gateway() {
       {/* ── Glassmorphic Card ─────────────────────────────── */}
       <div
         className="
-          relative z-10 max-w-[480px] w-full
+          relative z-10 max-w-md w-full
           bg-white/40 border border-white/60
-          p-6 rounded-none
+          p-10 rounded-2xl
           shadow-[0_8px_32px_rgba(28,25,23,0.04)]
           backdrop-blur-md
         "
       >
         {/* Brand header */}
         <div className="text-center flex flex-col items-center mb-4">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-none bg-sage/10 mb-2">
-            <Sparkles size={20} className="text-sage" />
-          </div>
-          <p className="font-jakarta text-[11px] font-semibold tracking-widest text-ink uppercase">
+          <p className="font-jakarta text-xs font-bold tracking-[0.15em] text-charcoal uppercase">
             LAST-MINUTE
           </p>
           <h1 className="font-lora text-4xl text-ink font-medium mt-1">
             Life Saver
           </h1>
-          <p className="font-jakarta text-sm text-charcoal mt-2 tracking-[0.08em]">
+          <div className="border-b border-ink/40 w-12 my-3 mx-auto" />
+          <p className="font-jakarta text-sm text-charcoal mt-1">
             Proactive AI Productivity Companion
           </p>
         </div>
-
-        {/* Divider */}
-        <div className="h-px bg-paper-border/60 mb-4" />
 
         {isRegistering ? (
           /* ════════════════════════════════════════════════
@@ -450,7 +445,7 @@ export default function Gateway() {
           <button
             type="button"
             onClick={() => setIsRegistering((prev) => !prev)}
-            className="text-[17px] text-ink font-semibold font-jakarta cursor-pointer hover:text-ink transition-colors focus:outline-none"
+            className="text-[11px] font-semibold font-jakarta tracking-wider text-charcoal underline uppercase cursor-pointer hover:text-ink transition-colors focus:outline-none"
           >
             {isRegistering
               ? 'Already have an account? Sign in'
@@ -468,10 +463,10 @@ export default function Gateway() {
           disabled={submitting}
           className="
             w-full flex items-center justify-center gap-2 cursor-pointer
-            rounded-none border border-ink/80 bg-ink/5 px-4 py-2.5
-            font-jakarta text-sm font-semibold text-ink
+            rounded-none border-0 bg-charcoal/10 px-4 py-2.5
+            font-jakarta text-sm font-semibold text-charcoal
             transition-all duration-300 ease-in-out
-            hover:scale-[1.02] hover:bg-ink/5 hover:border-ink/80 hover:shadow-sm
+            hover:scale-[1.02] hover:bg-charcoal/15 hover:shadow-sm
             active:scale-100
             disabled:opacity-50 disabled:pointer-events-none
           "
@@ -481,7 +476,7 @@ export default function Gateway() {
         </button>
 
         {/* Footer */}
-        <p className="mt-4 text-center text-xs text-ink/80 font-medium font-jakarta">
+        <p className="mt-4 text-center text-xs text-charcoal font-medium font-jakarta">
           Your data is encrypted and stored locally.
         </p>
       </div>
