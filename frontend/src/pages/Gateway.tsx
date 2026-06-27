@@ -278,13 +278,13 @@ export default function Gateway() {
           <div className="inline-flex items-center justify-center w-10 h-10 rounded-none bg-sage/10 mb-2">
             <Sparkles size={20} className="text-sage" />
           </div>
-          <p className="font-jakarta text-xs font-semibold tracking-widest text-charcoal/80 uppercase">
+          <p className="font-jakarta text-[11px] font-semibold tracking-widest text-ink uppercase">
             LAST-MINUTE
           </p>
           <h1 className="font-lora text-4xl text-ink font-medium mt-1">
             Life Saver
           </h1>
-          <p className="font-jakarta text-sm text-charcoal mt-2">
+          <p className="font-jakarta text-sm text-charcoal mt-2 tracking-[0.08em]">
             Proactive AI Productivity Companion
           </p>
         </div>
@@ -359,8 +359,8 @@ export default function Gateway() {
                 rounded-none bg-ink px-4 py-3
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300 ease-in-out will-change-transform
-                hover:bg-ink hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
-                active:translate-y-0 active:scale-100 active:shadow-sm
+                hover:bg-ink hover:scale-[1.02] hover:shadow-md
+                active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
               "
             >
@@ -369,7 +369,7 @@ export default function Gateway() {
               ) : (
                 <>
                   Create Account
-                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="transition-transform duration-300 ease-in-out group-hover:translate-x-1.5" />
                 </>
               )}
             </button>
@@ -428,8 +428,8 @@ export default function Gateway() {
                 rounded-none bg-ink px-4 py-3
                 font-jakarta text-sm font-semibold text-white
                 transition-all duration-300 ease-in-out will-change-transform
-                hover:bg-ink hover:scale-[1.02] hover:-translate-y-px hover:shadow-md
-                active:translate-y-0 active:scale-100 active:shadow-sm
+                hover:bg-ink hover:scale-[1.02] hover:shadow-md
+                active:scale-100 active:shadow-sm
                 disabled:opacity-50 disabled:pointer-events-none
               "
             >
@@ -438,7 +438,7 @@ export default function Gateway() {
               ) : (
                 <>
                   Sign In
-                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="transition-transform duration-300 ease-in-out group-hover:translate-x-1.5" />
                 </>
               )}
             </button>
@@ -450,7 +450,7 @@ export default function Gateway() {
           <button
             type="button"
             onClick={() => setIsRegistering((prev) => !prev)}
-            className="text-base text-charcoal font-semibold font-jakarta cursor-pointer hover:text-charcoal transition-colors"
+            className="text-[17px] text-ink font-semibold font-jakarta cursor-pointer hover:text-ink transition-colors focus:outline-none"
           >
             {isRegistering
               ? 'Already have an account? Sign in'
@@ -468,11 +468,11 @@ export default function Gateway() {
           disabled={submitting}
           className="
             w-full flex items-center justify-center gap-2 cursor-pointer
-            rounded-none border border-charcoal/40 bg-charcoal/5 px-4 py-2.5
-            font-jakarta text-sm font-semibold text-charcoal
-            transition-all duration-300
-            hover:scale-[1.02] hover:-translate-y-px hover:shadow-sm
-            active:translate-y-0 active:scale-100
+            rounded-none border border-ink/80 bg-ink/5 px-4 py-2.5
+            font-jakarta text-sm font-semibold text-ink
+            transition-all duration-300 ease-in-out
+            hover:scale-[1.02] hover:bg-ink/5 hover:border-ink/80 hover:shadow-sm
+            active:scale-100
             disabled:opacity-50 disabled:pointer-events-none
           "
         >
@@ -481,7 +481,7 @@ export default function Gateway() {
         </button>
 
         {/* Footer */}
-        <p className="mt-4 text-center text-xs text-charcoal font-medium font-jakarta">
+        <p className="mt-4 text-center text-xs text-ink/80 font-medium font-jakarta">
           Your data is encrypted and stored locally.
         </p>
       </div>
