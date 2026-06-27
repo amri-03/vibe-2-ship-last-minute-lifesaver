@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import api from '../services/api'
-import Logo from '../components/ui/Logo'
 
 /* ──────────────────────────────────────────────────────────
    Gateway.tsx — Onboarding & Multi-User Authentication
@@ -276,7 +275,6 @@ export default function Gateway() {
       >
         {/* Brand Header Stack */}
         <div className="text-center flex flex-col items-center">
-          <Logo className="w-24 h-24 mx-auto text-ink mb-2" />
           <p className="font-jakarta text-xs font-bold tracking-[0.15em] text-charcoal uppercase text-center">
             LAST-MINUTE
           </p>
