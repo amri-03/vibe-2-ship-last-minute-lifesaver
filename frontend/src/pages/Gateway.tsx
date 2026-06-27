@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import api from '../services/api'
+import Logo from '../components/ui/Logo'
 
 /* ──────────────────────────────────────────────────────────
    Gateway.tsx — Onboarding & Multi-User Authentication
@@ -268,21 +269,21 @@ export default function Gateway() {
         className="
           relative z-10 max-w-md w-full
           bg-white/40 border border-white/60
-          p-10 rounded-2xl
-          shadow-[0_8px_32px_rgba(28,25,23,0.04)]
+          p-8 rounded-2xl
+          shadow-sm
           backdrop-blur-md
         "
       >
-        {/* Brand header */}
-        <div className="text-center flex flex-col items-center mb-4">
-          <p className="font-jakarta text-xs font-bold tracking-[0.15em] text-charcoal uppercase">
+        {/* Brand Header Stack */}
+        <div className="text-center flex flex-col items-center">
+          <Logo className="w-24 h-24 mx-auto text-ink mb-2" />
+          <p className="font-jakarta text-xs font-bold tracking-[0.15em] text-charcoal uppercase text-center">
             LAST-MINUTE
           </p>
-          <h1 className="font-lora text-4xl text-ink font-medium mt-1">
+          <h1 className="font-lora text-3xl text-ink text-center mt-1">
             Life Saver
           </h1>
-          <div className="border-b border-ink/40 w-12 my-3 mx-auto" />
-          <p className="font-jakarta text-sm text-charcoal mt-1">
+          <p className="font-jakarta text-sm text-charcoal text-center mt-2 mb-6">
             Proactive AI Productivity Companion
           </p>
         </div>
