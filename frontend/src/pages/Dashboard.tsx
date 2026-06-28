@@ -19,8 +19,6 @@ import { useInterventions } from '../hooks/useInterventions'
    Split-screen: Chronicle (left 30vw) + Focus Stage (right 70vw)
    ────────────────────────────────────────────────────────── */
 
-// Simulated current time for preview (9:39 AM = 9.65)
-const CURRENT_HOUR = 9.65
 
 // Helper function to calculate local decimal hour (e.g., 9:30 AM = 9.5)
 const getDecimalHour = () => {
@@ -143,7 +141,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
       {/* ════════════════════════════════════════════════════
           Header Bar
           ════════════════════════════════════════════════════ */}
-      <header className="border-b border-paper-border flex-shrink-0 mb-8 pb-4">
+      <header className="border-b border-paper-border flex-shrink-0 pb-4 mb-4">
         <div className="w-full flex items-center justify-between">
           <h1 className="font-lora text-lg font-medium tracking-tight text-ink">
             Life Saver

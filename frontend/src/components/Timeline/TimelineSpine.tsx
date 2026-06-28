@@ -46,8 +46,8 @@ const KIND_CONFIG: Record<EventKind, {
 export default function TimelineSpine({ entries }: TimelineSpineProps) {
   return (
     <div className="relative w-full">
-      {/* Vertical spine line centered exactly */}
-      <div className="absolute left-1/2 top-4 bottom-4 border-l-2 border-paper-border -translate-x-1/2" />
+      {/* Vertical spine line anchored on the left */}
+      <div className="absolute left-[5px] top-4 bottom-4 border-l-2 border-paper-border" />
 
       <ol className="space-y-6 w-full relative">
         {entries.map((entry) => {
@@ -56,17 +56,8 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
           const isIntervention = entry.kind === 'intervention'
 
           return (
-            <li key={entry.id} className="relative grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-4 items-start py-2">
-              {/* ── Left Column: Time Guideline ────────────────── */}
-              <div className="text-right text-sm font-jakarta font-semibold text-charcoal pt-0.5">
-                {isIntervention ? (
-                  <span className="text-terracotta font-semibold">Suggest</span>
-                ) : (
-                  entry.time
-                )}
-              </div>
-
-              {/* ── Middle Column: Spine Dot ───────────────────── */}
+            <li key={entry.id} className="relative grid grid-cols-[12px_1fr] gap-4 items-start py-2">
+              {/* ── Column 1: Spine Dot ───────────────────────── */}
               <div className="relative z-10 flex items-center justify-center pt-1.5">
                 <div
                   className={`
@@ -77,15 +68,23 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
                 />
               </div>
 
-              {/* ── Right Column: Transparent Row ──────────────── */}
+              {/* ── Column 2: Event Details ────────────────────── */}
               <div className="text-left min-w-0 flex flex-col justify-start">
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2 min-w-0 flex-wrap">
+                  <span className="text-xs font-jakarta font-semibold text-charcoal/70 uppercase">
+                    {isIntervention ? (
+                      <span className="text-terracotta font-semibold">Suggest</span>
+                    ) : (
+                      entry.time
+                    )}
+                  </span>
+                  <span className="text-charcoal/30 text-[10px]">•</span>
                   <Icon
                     size={14}
                     className={
                       isIntervention ? 'text-terracotta flex-shrink-0'
                         : entry.isActive ? 'text-sage flex-shrink-0'
-                        : 'text-charcoal flex-shrink-0'
+                        : 'text-charcoal/60 flex-shrink-0'
                     }
                   />
                   <span
