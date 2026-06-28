@@ -22,7 +22,7 @@ const CY = SIZE / 2
 const OUTER_R = 143        // outer ring
 const TICK_OUTER = 143
 const TICK_INNER = 133
-const LABEL_R = 98
+const LABEL_R = 100
 const DOT_R = 125          // pulsing current-time dot centered on the arc path
 const INNER_R_ARC = 117    // inner radius for segment fill
 const OUTER_R_ARC = 133    // outer radius for segment fill
@@ -42,7 +42,7 @@ function hourToAngle(hour: number, rangeStart: number, rangeEnd: number): number
   const span = rangeEnd - rangeStart
   const fraction = (hour - rangeStart) / span
   // Start from top (-90°), sweep clockwise
-  return -90 + fraction * 360
+  return 120 + fraction * 360
 }
 
 function polarToXY(cx: number, cy: number, r: number, angleDeg: number) {

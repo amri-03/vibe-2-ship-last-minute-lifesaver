@@ -22,6 +22,12 @@ import { useInterventions } from '../hooks/useInterventions'
 // Simulated current time for preview (9:39 AM = 9.65)
 const CURRENT_HOUR = 9.65
 
+// Helper function to calculate local decimal hour (e.g., 9:30 AM = 9.5)
+const getDecimalHour = () => {
+  const now = new Date()
+  return now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600
+}
+
 interface DashboardProps {
   onLock?: () => void
 }
@@ -35,6 +41,17 @@ export default function Dashboard({ onLock }: DashboardProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isDebugOpen, setIsDebugOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+
+  // Initialize state with the current decimal hour
+  const [currentHour, setCurrentHour] = useState(getDecimalHour)
+
+  // Update state every 30 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentHour(getDecimalHour())
+    }, 30000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Fetch interventions on mount
   useEffect(() => {
@@ -218,7 +235,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               <div className="hidden sm:flex justify-center py-2">
                 <DayDial
                   segments={MOCK_DIAL_SEGMENTS}
-                  currentHour={CURRENT_HOUR}
+                  currentHour={currentHour} // Uses the dynamic state variable instead of static constant
                 />
               </div>
 
