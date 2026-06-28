@@ -58,7 +58,6 @@ export default function DebugDrawer({ isOpen, onClose }: DebugDrawerProps) {
         className={`
           fixed top-0 right-0 bottom-0 z-40 w-full max-w-[360px]
           bg-card-linen border-l border-paper-border
-          shadow-[-8px_0_32px_rgba(28,25,23,0.04)]
           transform transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)
           flex flex-col
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}
@@ -72,7 +71,7 @@ export default function DebugDrawer({ isOpen, onClose }: DebugDrawerProps) {
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 text-charcoal/50 hover:text-ink hover:bg-paper-border/40 rounded-full transition-colors"
+            className="p-1.5 text-charcoal/50 hover:text-ink hover:bg-paper-border/40 rounded-none transition-colors"
           >
             <X size={18} />
           </button>
@@ -97,19 +96,19 @@ export default function DebugDrawer({ isOpen, onClose }: DebugDrawerProps) {
 
           <div className="pt-2">
             <button
-              type="button"
-              onClick={handleSeed}
-              disabled={seeding}
-              className="
-                w-full flex items-center justify-center gap-2
-                rounded-lg bg-terracotta px-4 py-3
-                font-jakarta text-sm font-semibold text-white
-                transition-all duration-300
-                hover:bg-terracotta/90 hover:-translate-y-px hover:shadow-md
-                active:translate-y-0 active:shadow-sm
-                disabled:opacity-50 disabled:pointer-events-none
-              "
-            >
+               type="button"
+               onClick={handleSeed}
+               disabled={seeding}
+               className="
+                 w-full flex items-center justify-center gap-2
+                 rounded-none bg-terracotta px-4 py-3
+                 font-jakarta text-sm font-semibold text-white
+                 transition-all duration-300
+                 hover:bg-terracotta/90 hover:-translate-y-px
+                 active:translate-y-0
+                 disabled:opacity-50 disabled:pointer-events-none
+               "
+             >
               {seeding ? (
                 <RefreshCw size={16} className="animate-spin" />
               ) : (

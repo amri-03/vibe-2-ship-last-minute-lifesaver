@@ -122,7 +122,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
   }, [activeIntervention, updateInterventionStatus, fetchInterventions])
 
   return (
-    <div className="w-screen min-h-screen lg:h-screen lg:overflow-hidden px-12 py-8 flex flex-col bg-canvas lg:min-h-0">
+    <div className="w-screen h-screen px-12 py-8 flex flex-col bg-canvas overflow-hidden">
       {/* ════════════════════════════════════════════════════
           Header Bar
           ════════════════════════════════════════════════════ */}
@@ -137,7 +137,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Companion"
               onClick={() => setIsDrawerOpen(true)}
               className="
-                rounded-lg p-2 text-charcoal/80
+                rounded-none p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-sage/10 hover:text-sage
               "
@@ -149,7 +149,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Debug"
               onClick={() => setIsDebugOpen(true)}
               className="
-                rounded-lg p-2 text-charcoal/80
+                rounded-none p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-paper-border/30 hover:text-charcoal
               "
@@ -161,7 +161,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Settings"
               onClick={() => setIsSettingsOpen(true)}
               className="
-                rounded-lg p-2 text-charcoal/80
+                rounded-none p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-paper-border/30 hover:text-charcoal
               "
@@ -173,7 +173,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
               title="Lock workspace"
               onClick={handleLock}
               className="
-                rounded-lg p-2 text-charcoal/80
+                rounded-none p-2 text-charcoal/80
                 transition-all duration-200
                 hover:bg-terracotta/10 hover:text-terracotta
               "
@@ -193,7 +193,7 @@ export default function Dashboard({ onLock }: DashboardProps) {
           {/* ── THE CHRONICLE (Left Column) ────────────── */}
           <aside
             className="
-              w-full lg:w-[28%]
+              w-full lg:w-[30%]
               border-b lg:border-b-0 lg:border-r border-paper-border
               bg-card-linen/40
               flex flex-col lg:h-full lg:overflow-hidden min-h-0
@@ -233,9 +233,9 @@ export default function Dashboard({ onLock }: DashboardProps) {
           </aside>
 
           {/* ── THE FOCUS STAGE (Right Column) ─────────── */}
-          <section className="w-full lg:w-[72%] flex flex-col lg:h-full lg:overflow-hidden min-h-0">
-            {/* Active Focus Card (Fixed) */}
-            <div className="flex-shrink-0">
+          <section className="w-full lg:w-[70%] flex flex-col lg:h-full lg:overflow-y-auto pr-2 gap-8 min-h-0">
+            {/* Active Focus Card */}
+            <div>
               <ActiveFocusCard
                 session={session}
                 onStart={handleStart}
@@ -244,8 +244,8 @@ export default function Dashboard({ onLock }: DashboardProps) {
               />
             </div>
 
-            {/* Task Deck (Scrollable) */}
-            <div className="flex-1 lg:overflow-y-auto mt-8 pr-2">
+            {/* Task Deck */}
+            <div>
               <TaskDeck tasks={tasks} />
             </div>
           </section>

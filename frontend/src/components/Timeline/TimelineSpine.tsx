@@ -70,7 +70,7 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
               <div className="relative z-10 flex items-center justify-center pt-1.5">
                 <div
                   className={`
-                    w-3 h-3 rounded-full border-2 border-canvas
+                    w-3 h-3 rounded-none border-2 border-canvas
                     ${config.dotColor}
                     ${entry.isActive ? 'ring-2 ring-sage/30' : ''}
                   `}
@@ -103,8 +103,8 @@ export default function TimelineSpine({ entries }: TimelineSpineProps) {
                 {entry.isActive && (
                   <div className="mt-1 flex items-center gap-1.5">
                     <span className="relative flex h-1.5 w-1.5">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-sage opacity-75 animate-ping" />
-                      <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-sage" />
+                      <span className="absolute inline-flex h-full w-full rounded-none bg-sage opacity-75 animate-ping" />
+                      <span className="relative inline-flex h-1.5 w-1.5 rounded-none bg-sage" />
                     </span>
                     <span className="text-xs font-jakarta font-semibold text-sage">
                       In progress

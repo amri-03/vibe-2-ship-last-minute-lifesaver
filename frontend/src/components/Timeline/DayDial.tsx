@@ -22,7 +22,7 @@ const CY = SIZE / 2
 const OUTER_R = 143        // outer ring
 const TICK_OUTER = 143
 const TICK_INNER = 133
-const LABEL_R = 113
+const LABEL_R = 98
 const DOT_R = 125          // pulsing current-time dot centered on the arc path
 const INNER_R_ARC = 117    // inner radius for segment fill
 const OUTER_R_ARC = 133    // outer radius for segment fill
@@ -198,7 +198,7 @@ export default function DayDial({
                 fontWeight={600}
                 opacity={1}
               >
-                {h > 12 ? `${h - 12}p` : h === 12 ? '12p' : `${h}a`}
+                {h > 12 ? `${h - 12}P` : h === 12 ? '12P' : `${h}A`}
               </text>
             )}
           </g>

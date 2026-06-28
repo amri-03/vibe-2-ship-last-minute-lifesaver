@@ -85,9 +85,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           className="
-            relative w-full max-w-md rounded-xl
+            relative w-full max-w-md rounded-none
             bg-white/95 border border-white/60
-            p-8 shadow-[0_12px_40px_rgba(28,25,23,0.06)]
+            p-8
             backdrop-blur-md space-y-6
           "
         >
@@ -99,7 +99,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </h2>
             <button
               onClick={onClose}
-              className="p-1.5 text-charcoal/50 hover:text-ink hover:bg-paper-border/30 rounded-full transition-colors"
+              className="p-1.5 text-charcoal/50 hover:text-ink hover:bg-paper-border/30 rounded-none transition-colors"
               aria-label="Close settings"
             >
               <X size={18} />
@@ -122,13 +122,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 disabled={connecting || googleConnected}
                 className={`
                   w-full flex items-center justify-center gap-2.5
-                  rounded-lg border px-4 py-3
+                  rounded-none border px-4 py-3
                   font-jakarta text-sm font-medium
                   transition-all duration-300
                   ${
                     googleConnected
                       ? 'border-sage/40 bg-sage/5 text-sage cursor-default'
-                      : 'border-paper-border bg-white text-ink hover:bg-card-linen hover:border-charcoal/30 hover:-translate-y-px hover:shadow-sm active:translate-y-0 disabled:opacity-50'
+                      : 'border-paper-border bg-white text-ink hover:bg-card-linen hover:border-charcoal/30 hover:-translate-y-px active:translate-y-0 disabled:opacity-50'
                   }
                 `}
               >
@@ -184,10 +184,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 placeholder={geminiConfigured ? '••••••••••••••••' : 'AIzaSy…'}
                 autoComplete="off"
                 className="
-                  w-full rounded-lg border border-paper-border bg-white px-4 py-3
+                  w-full rounded-none border border-paper-border bg-white px-4 py-3
                   font-jakarta text-sm text-ink placeholder-charcoal/40
                   outline-none transition-all duration-200
-                  focus:ring-2 focus:ring-horizon/30 focus:border-horizon
+                  focus:ring-1 focus:ring-horizon/30 focus:border-horizon
                 "
               />
             </div>
@@ -196,7 +196,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             {message && (
               <div
                 className={`
-                  rounded-lg border px-4 py-3 text-xs font-jakarta font-medium
+                  rounded-none border px-4 py-3 text-xs font-jakarta font-medium
                   ${
                     message.type === 'success'
                       ? 'bg-sage/8 border-sage/20 text-sage'
@@ -214,7 +214,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 type="button"
                 onClick={onClose}
                 className="
-                  px-4 py-2.5 rounded-lg
+                  px-4 py-2.5 rounded-none
                   font-jakarta text-xs font-medium text-charcoal
                   transition-colors hover:bg-paper-border/30
                 "
@@ -225,10 +225,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 type="submit"
                 disabled={saving || !geminiKey.trim()}
                 className="
-                  flex items-center gap-1.5 px-5 py-2.5 rounded-lg
+                  flex items-center gap-1.5 px-5 py-2.5 rounded-none
                   bg-ink text-white font-jakarta text-xs font-semibold
                   transition-all duration-300
-                  hover:bg-ink/90 hover:-translate-y-px hover:shadow-sm
+                  hover:bg-ink/90 hover:-translate-y-px
                   active:translate-y-0
                   disabled:opacity-50 disabled:pointer-events-none
                 "

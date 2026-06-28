@@ -90,7 +90,6 @@ export default function CompanionDrawer({ isOpen, onClose }: CompanionDrawerProp
         className={`
           fixed top-0 right-0 bottom-0 z-40 w-full max-w-[360px] 
           bg-card-linen border-l border-paper-border
-          shadow-[-8px_0_32px_rgba(28,25,23,0.04)]
           transform transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1)
           flex flex-col
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}
@@ -98,12 +97,12 @@ export default function CompanionDrawer({ isOpen, onClose }: CompanionDrawerProp
       >
         {/* Header */}
         <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-paper-border/60">
-          <div className="flex bg-paper-border/30 rounded-lg p-1">
+          <div className="flex bg-paper-border/30 rounded-none p-1">
             <button
               onClick={() => setActiveTab('chat')}
               className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-jakarta font-medium transition-colors
-                ${activeTab === 'chat' ? 'bg-white shadow-sm text-ink' : 'text-charcoal hover:text-ink'}
+                flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-jakarta font-medium transition-colors
+                ${activeTab === 'chat' ? 'bg-white text-ink border border-paper-border/30' : 'text-charcoal hover:text-ink'}
               `}
             >
               <MessageSquare size={14} />
@@ -112,8 +111,8 @@ export default function CompanionDrawer({ isOpen, onClose }: CompanionDrawerProp
             <button
               onClick={() => setActiveTab('log')}
               className={`
-                flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-jakarta font-medium transition-colors
-                ${activeTab === 'log' ? 'bg-white shadow-sm text-ink' : 'text-charcoal hover:text-ink'}
+                flex items-center gap-1.5 px-3 py-1.5 rounded-none text-xs font-jakarta font-medium transition-colors
+                ${activeTab === 'log' ? 'bg-white text-ink border border-paper-border/30' : 'text-charcoal hover:text-ink'}
               `}
             >
               <Terminal size={14} />
@@ -122,7 +121,7 @@ export default function CompanionDrawer({ isOpen, onClose }: CompanionDrawerProp
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-charcoal/50 hover:text-ink hover:bg-paper-border/40 rounded-full transition-colors"
+            className="p-1.5 text-charcoal/50 hover:text-ink hover:bg-paper-border/40 rounded-none transition-colors"
           >
             <X size={18} />
           </button>
@@ -139,10 +138,10 @@ export default function CompanionDrawer({ isOpen, onClose }: CompanionDrawerProp
                 >
                   <div 
                     className={`
-                      max-w-[85%] rounded-2xl px-4 py-3 shadow-sm
+                      max-w-[85%] rounded-none px-4 py-3 border border-paper-border
                       ${msg.role === 'user' 
-                        ? 'bg-ink text-white rounded-br-sm' 
-                        : 'bg-white border border-paper-border text-ink rounded-bl-sm'}
+                        ? 'bg-ink text-white' 
+                        : 'bg-white text-ink'}
                     `}
                   >
                     <p className={`text-sm leading-relaxed ${msg.role === 'user' ? 'font-jakarta' : 'font-lora'}`}>
@@ -183,9 +182,9 @@ export default function CompanionDrawer({ isOpen, onClose }: CompanionDrawerProp
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="CMD_INPUT >"
                 className="
-                  w-full bg-canvas border border-paper-border rounded-lg pl-4 pr-10 py-3
+                  w-full bg-canvas border border-paper-border rounded-none pl-4 pr-10 py-3
                   font-jakarta text-sm text-ink placeholder-charcoal/40
-                  focus:outline-none focus:ring-2 focus:ring-horizon/30 focus:border-horizon
+                  focus:outline-none focus:ring-1 focus:ring-horizon/30 focus:border-horizon
                 "
               />
               <button

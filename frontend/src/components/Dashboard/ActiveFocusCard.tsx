@@ -45,9 +45,9 @@ export default function ActiveFocusCard({
   // ── Resting state (no active session) ────────────────────
   if (!session) {
     return (
-      <div className="rounded-2xl border border-paper-border bg-card-linen px-12 py-10">
+      <div className="rounded-none border border-paper-border bg-card-linen px-12 py-10">
         <div className="flex flex-col items-center text-center py-4 space-y-4">
-          <div className="w-14 h-14 rounded-full bg-sage/10 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-none bg-sage/10 flex items-center justify-center">
             <Target size={24} className="text-sage" />
           </div>
           <div className="space-y-2">
@@ -63,11 +63,11 @@ export default function ActiveFocusCard({
             type="button"
             onClick={onStart}
             className="
-              inline-flex items-center gap-2 rounded-lg
+              inline-flex items-center gap-2 rounded-none
               bg-ink px-8 py-4 font-jakarta text-base font-semibold text-white
               transition-all duration-300
-              hover:bg-ink/90 hover:-translate-y-0.5 hover:shadow-md
-              active:translate-y-0 active:shadow-sm
+              hover:bg-ink/90 hover:-translate-y-0.5
+              active:translate-y-0
             "
           >
             <Play size={15} />
@@ -80,11 +80,11 @@ export default function ActiveFocusCard({
 
   // ── Active session ───────────────────────────────────────
   return (
-    <div className="rounded-2xl border border-paper-border bg-card-linen overflow-hidden">
+    <div className="rounded-none border border-paper-border bg-card-linen overflow-hidden">
       {/* Progress bar */}
       <div className="h-1 bg-paper-border/40">
         <div
-          className="h-full bg-sage transition-all duration-1000 ease-linear rounded-r-full"
+          className="h-full bg-sage transition-all duration-1000 ease-linear rounded-none"
           style={{ width: `${progress * 100}%` }}
         />
       </div>
@@ -96,8 +96,8 @@ export default function ActiveFocusCard({
             <div className="flex items-center gap-2">
               {session.isRunning && (
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-sage opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sage" />
+                  <span className="absolute inline-flex h-full w-full rounded-none bg-sage opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-none bg-sage" />
                 </span>
               )}
               <span className="text-sm font-jakarta font-semibold uppercase tracking-widest text-sage">
@@ -112,7 +112,7 @@ export default function ActiveFocusCard({
             </p>
           </div>
 
-          <div className="flex-shrink-0 w-12 h-12 rounded-full bg-sage/10 flex items-center justify-center">
+          <div className="flex-shrink-0 w-12 h-12 rounded-none bg-sage/10 flex items-center justify-center">
             <Timer size={20} className="text-sage" />
           </div>
         </div>
@@ -139,11 +139,11 @@ export default function ActiveFocusCard({
             onClick={handleToggle}
             className="
               flex-1 inline-flex items-center justify-center gap-2
-              rounded-lg bg-ink px-8 py-4
+              rounded-none bg-ink px-8 py-4
               font-jakarta text-base font-semibold text-white
               transition-all duration-300
-              hover:bg-ink/90 hover:-translate-y-0.5 hover:shadow-md
-              active:translate-y-0 active:shadow-sm
+              hover:bg-ink/90 hover:-translate-y-0.5
+              active:translate-y-0
             "
           >
             {session.isRunning ? (
@@ -163,11 +163,11 @@ export default function ActiveFocusCard({
             onClick={onSnooze}
             className="
               inline-flex items-center justify-center gap-2
-              rounded-lg border border-paper-border bg-white/60 px-8 py-4
+              rounded-none border border-paper-border bg-white/60 px-8 py-4
               font-jakarta text-base font-semibold text-charcoal
               transition-all duration-300
-              hover:bg-white hover:border-charcoal/30 hover:-translate-y-0.5 hover:shadow-md
-              active:translate-y-0 active:shadow-sm
+              hover:bg-white hover:border-charcoal/30 hover:-translate-y-0.5
+              active:translate-y-0
             "
           >
             <Moon size={15} />

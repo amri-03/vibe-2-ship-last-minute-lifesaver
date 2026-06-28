@@ -30,8 +30,8 @@ function StatusIcon({ status }: { status: TaskStatus }) {
     case 'in_progress':
       return (
         <span className="relative flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center">
-          <span className="absolute inline-flex h-2.5 w-2.5 rounded-full bg-sage opacity-50 animate-ping" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-sage" />
+          <span className="absolute inline-flex h-2.5 w-2.5 rounded-none bg-sage opacity-50 animate-ping" />
+          <span className="relative inline-flex h-2 w-2 rounded-none bg-sage" />
         </span>
       )
     default:
@@ -47,7 +47,7 @@ function TaskRow({ task }: { task: Task }) {
   return (
     <li
       className={`
-        group flex items-center gap-3 rounded-lg px-5 py-4
+        group flex items-center gap-3 rounded-none px-5 py-4
         transition-colors duration-200 cursor-default
         ${isCompleted ? 'opacity-60' : 'hover:bg-card-linen'}
       `}
@@ -77,7 +77,7 @@ function TaskRow({ task }: { task: Task }) {
         </span>
         <span
           className={`
-            inline-flex items-center rounded-full border
+            inline-flex items-center rounded-none border
             px-2.5 py-1 text-xs font-jakarta font-semibold uppercase tracking-wide
             ${PRIORITY_CLASSES[task.priority]}
           `}
@@ -124,7 +124,7 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
             {backlog.length} remaining
           </span>
         </div>
-        <div className="rounded-xl border border-paper-border bg-white/40 backdrop-blur-sm overflow-hidden">
+        <div className="rounded-none border border-paper-border bg-white/40 backdrop-blur-sm overflow-hidden">
           {backlog.length > 0 ? (
             <ul className="divide-y divide-paper-border/40">
               {backlog.map((t) => (
@@ -150,7 +150,7 @@ export default function TaskDeck({ tasks }: TaskDeckProps) {
               {completed.length} done
             </span>
           </div>
-          <div className="rounded-xl border border-paper-border/50 bg-white/20 overflow-hidden">
+          <div className="rounded-none border border-paper-border/50 bg-white/20 overflow-hidden">
             <ul className="divide-y divide-paper-border/30">
               {completed.map((t) => (
                 <TaskRow key={t.id} task={t} />

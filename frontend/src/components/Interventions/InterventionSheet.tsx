@@ -44,10 +44,9 @@ export default function InterventionSheet({
       >
         <div
           className="
-            w-full max-w-3xl rounded-t-2xl
+            w-full max-w-3xl rounded-none
             bg-gradient-to-tr from-card-linen via-white/95 to-card-linen
             border-t border-x border-paper-border
-            shadow-[0_-12px_40px_rgba(28,25,23,0.06)]
             p-6 sm:p-8
           "
         >
@@ -59,7 +58,7 @@ export default function InterventionSheet({
             </h2>
             <button
               onClick={onDismiss}
-              className="p-2 text-charcoal/50 hover:text-ink transition-colors rounded-full hover:bg-paper-border/30"
+              className="p-2 text-charcoal/50 hover:text-ink transition-colors rounded-none hover:bg-paper-border/30"
               aria-label="Close"
             >
               <ChevronDown size={20} />
@@ -73,7 +72,7 @@ export default function InterventionSheet({
                 <p className="font-jakarta text-sm text-charcoal">
                   {intervention.message}
                 </p>
-                <div className="bg-white/60 border border-paper-border rounded-lg p-5 font-jakarta text-sm text-ink whitespace-pre-wrap leading-relaxed shadow-sm">
+                <div className="bg-white/60 border border-paper-border rounded-none p-5 font-jakarta text-sm text-ink whitespace-pre-wrap leading-relaxed">
                   {intervention.payload?.draftText}
                 </div>
               </div>
@@ -86,7 +85,7 @@ export default function InterventionSheet({
                 </p>
                 <div className="inline-flex flex-col gap-3">
                   {intervention.payload?.slots?.map((slot: string, i: number) => (
-                    <div key={i} className="px-4 py-3 bg-white border border-paper-border rounded-lg shadow-sm font-jakarta text-sm font-medium text-ink">
+                    <div key={i} className="px-4 py-3 bg-white border border-paper-border rounded-none font-jakarta text-sm font-medium text-ink">
                       {slot}
                     </div>
                   ))}
@@ -112,13 +111,13 @@ export default function InterventionSheet({
               <>
                 <button
                   onClick={onDismiss}
-                  className="px-5 py-2.5 rounded-lg font-jakarta text-sm font-medium text-charcoal hover:bg-paper-border/30 transition-colors"
+                  className="px-5 py-2.5 rounded-none font-jakarta text-sm font-medium text-charcoal hover:bg-paper-border/30 transition-colors"
                 >
                   Dismiss
                 </button>
                 <button
                   onClick={() => onAcceptDraft?.(intervention.payload?.draftText)}
-                  className="px-5 py-2.5 rounded-lg bg-ink text-white font-jakarta text-sm font-semibold hover:-translate-y-px hover:shadow-md transition-all duration-300"
+                  className="px-5 py-2.5 rounded-none bg-ink text-white font-jakarta text-sm font-semibold hover:-translate-y-px transition-all duration-300"
                 >
                   Accept Draft
                 </button>
@@ -129,13 +128,13 @@ export default function InterventionSheet({
               <>
                 <button
                   onClick={onSnooze}
-                  className="px-5 py-2.5 rounded-lg font-jakarta text-sm font-medium text-charcoal hover:bg-paper-border/30 transition-colors"
+                  className="px-5 py-2.5 rounded-none font-jakarta text-sm font-medium text-charcoal hover:bg-paper-border/30 transition-colors"
                 >
                   Snooze
                 </button>
                 <button
                   onClick={onConfirmSlots}
-                  className="px-5 py-2.5 rounded-lg bg-ink text-white font-jakarta text-sm font-semibold hover:-translate-y-px hover:shadow-md transition-all duration-300"
+                  className="px-5 py-2.5 rounded-none bg-ink text-white font-jakarta text-sm font-semibold hover:-translate-y-px transition-all duration-300"
                 >
                   Confirm Slots
                 </button>
@@ -146,13 +145,13 @@ export default function InterventionSheet({
               <>
                 <button
                   onClick={onDismiss}
-                  className="px-5 py-2.5 rounded-lg font-jakarta text-sm font-medium text-charcoal hover:bg-paper-border/30 transition-colors"
+                  className="px-5 py-2.5 rounded-none font-jakarta text-sm font-medium text-charcoal hover:bg-paper-border/30 transition-colors"
                 >
                   Not Now
                 </button>
                 <button
                   onClick={onConfirmSlots}
-                  className="px-5 py-2.5 rounded-lg bg-terracotta text-white font-jakarta text-sm font-semibold hover:-translate-y-px hover:shadow-md transition-all duration-300 flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-none bg-terracotta text-white font-jakarta text-sm font-semibold hover:-translate-y-px transition-all duration-300 flex items-center gap-2"
                 >
                   <Zap size={16} />
                   Start 45m Session Now
