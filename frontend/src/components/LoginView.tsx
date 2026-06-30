@@ -84,8 +84,9 @@ export default function LoginView({ theme, onAuthSuccess, onGuestLogin }: LoginV
           if (onGuestLogin) {
             onGuestLogin({
               displayName: newUser.name,
-              email: newUser.email
-            });
+              email: newUser.email,
+              isGoogle: newUser.email.endsWith('@gmail.com') || newUser.email.endsWith('@google.com')
+            } as any);
           } else {
             onAuthSuccess();
           }
@@ -106,8 +107,9 @@ export default function LoginView({ theme, onAuthSuccess, onGuestLogin }: LoginV
           if (onGuestLogin) {
             onGuestLogin({
               displayName: user.name,
-              email: user.email
-            });
+              email: user.email,
+              isGoogle: user.email.endsWith('@gmail.com') || user.email.endsWith('@google.com')
+            } as any);
           } else {
             onAuthSuccess();
           }

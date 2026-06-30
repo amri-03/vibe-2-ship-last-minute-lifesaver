@@ -461,7 +461,7 @@ export default function App() {
       displayName: customUser?.displayName || 'Demo Space Cadet',
       email: customUser?.email || 'demo@lifesaver.app',
       isOfflineMode: true,
-      isGoogle: customUser?.isGoogle || false
+      isGoogle: customUser?.isGoogle || customUser?.email.endsWith('@gmail.com') || customUser?.email.endsWith('@google.com') || false
     };
     localStorage.setItem('saver_guest_user', JSON.stringify(guestUser));
     setCurrentUser(guestUser);
