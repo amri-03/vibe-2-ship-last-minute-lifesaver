@@ -1,2 +1,0 @@
-// Interventions components — placeholder
-export {}
