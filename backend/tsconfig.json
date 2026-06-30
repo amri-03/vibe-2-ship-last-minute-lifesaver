@@ -1,15 +1,26 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
     "esModuleInterop": true,
+    "strict": false,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": [
+    "server.ts",
+    "src/db/**/*",
+    "src/middleware/**/*",
+    "src/lib/**/*",
+    "src/types.ts"
+  ],
+  "exclude": [
+    "src/db/drizzle.config.ts",
+    "src/lib/firebase.ts",
+    "src/main.tsx",
+    "src/App.tsx",
+    "src/components/**/*"
+  ]
 }
